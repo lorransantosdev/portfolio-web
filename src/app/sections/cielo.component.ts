@@ -31,7 +31,7 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
                 <span class="rd mono">{{ t().cielo.rolePrev.dates }}</span>
               </div>
             </div>
-            <a class="ul li" [href]="t().cielo.linkedin.href">{{ t().cielo.linkedin.label }}</a>
+            <a class="ul li tap" [href]="t().cielo.linkedin.href">{{ t().cielo.linkedin.label }}</a>
             <div class="dolabel mono">{{ t().cielo.doLabel }}</div>
             <div class="does">
               @for (d of t().cielo.does; track $index) {
@@ -85,7 +85,7 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
   styles: `
     :host { display: block; }
     .dark { background: var(--black); color: var(--cream); margin-top: 60px; }
-    .dark a:hover { color: var(--red); }
+    @media (hover: hover) and (pointer: fine) { .dark a:hover { color: var(--red); } }
     .inner { padding-top: 110px; padding-bottom: 110px; }
     .grid { --min: 320px; --gap: 56px; margin-top: 28px; align-items: start; }
     .title { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(64px, 8vw, 120px); line-height: .88; letter-spacing: -.03em; }

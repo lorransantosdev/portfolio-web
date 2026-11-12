@@ -44,15 +44,18 @@ import { MotionService } from '../core/motion.service';
     .layer {
       display: grid; grid-template-columns: 64px 150px minmax(0, 1fr); gap: 18px; align-items: baseline;
       padding: 18px 14px; border-top: 1px solid rgba(0, 0, 0, .16);
-      transition: background .35s var(--ease), color .35s var(--ease), padding .45s var(--ease); cursor: default;
+      transition: background-color .3s ease, color .3s ease; cursor: default;
     }
+    .layer > * { transition: translate .3s var(--ease); }
     .layer.last { border-bottom: 1px solid rgba(0, 0, 0, .16); }
-    .layer.on { background: var(--black); color: var(--cream); padding-left: 26px; }
+    .layer.on { background: var(--black); color: var(--cream); }
+    .layer.on > * { translate: 12px 0; }
     .layer.on .lab { color: inherit; }
     .layer.on .lidx { color: var(--red-on-dark); }
     .h-touch { display: none; }
-    @media (hover: hover) {
-      .layer:hover { background: var(--black); color: var(--cream); padding-left: 26px; }
+    @media (hover: hover) and (pointer: fine) {
+      .layer:hover { background: var(--black); color: var(--cream); }
+      .layer:hover > * { translate: 12px 0; }
       .layer:hover .lab { color: inherit; }
       .layer:hover .lidx { color: var(--red-on-dark); }
     }
@@ -91,9 +94,14 @@ export class StackPilhaComponent {
           .map((s) => s.firstChild)
           .filter((n): n is Text => !!n && n.nodeType === Node.TEXT_NODE);
         const orig = nodes.map((n) => n.nodeValue || '');
+        const box = L.querySelector<HTMLElement>('.items')!;
         let stop: (() => void) | null = null;
         const enter = () => {
           stop?.();
+          // os dígitos quebram a linha em outro ponto: segura a altura enquanto troca
+          nodes.forEach((n, j) => (n.nodeValue = orig[j]));
+          box.style.height = '';
+          box.style.height = box.offsetHeight + 'px';
           const t0 = performance.now();
           stop = motion.add((now) => {
             const p = Math.min(1, (now - t0) / 650);
@@ -103,7 +111,7 @@ export class StackPilhaComponent {
               for (let i = 0; i < t.length; i++) o += t[i] === ' ' || i < k ? t[i] : Math.random() < .5 ? '0' : '1';
               n.nodeValue = o;
             });
-            if (p >= 1) { nodes.forEach((n, j) => (n.nodeValue = orig[j])); return false; }
+            if (p >= 1) { nodes.forEach((n, j) => (n.nodeValue = orig[j])); box.style.height = ''; return false; }
             return true;
           });
         };

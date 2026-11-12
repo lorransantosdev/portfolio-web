@@ -89,7 +89,9 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
     .bubble {
       position: absolute; right: 4%; top: 6%; z-index: 4; background: var(--black); color: var(--cream);
       font-size: 15px; padding: 10px 14px; border-radius: 16px 16px 4px 16px; max-width: 200px;
+      transform-origin: 100% 100%; animation: say-in .22s var(--ease) both;
     }
+    @keyframes say-in { from { opacity: 0; scale: .92; translate: 0 6px; } }
     .mono-h { font-family: var(--font-mono); font-size: 16px; font-weight: 600; }
     .heart { z-index: 5; }
     .petbtn { display: block; width: 100%; background: none; border: 0; padding: 0; cursor: pointer; position: relative; }
@@ -97,7 +99,8 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
     .fq button:active .sign { scale: .8; }
     .scott {
       position: relative; display: block; width: 78%; max-width: 380px; margin: 0 auto; height: auto;
-      transform-origin: 50% 100%; transition: transform .45s cubic-bezier(.34, 1.56, .64, 1);
+      aspect-ratio: 520 / 481; object-fit: contain; object-position: 50% 100%;
+      transform-origin: 50% 100%; transition: transform .45s cubic-bezier(.34, 1.56, .64, 1); will-change: rotate, scale;
     }
     .scott.jump { transform: translateY(-34px); }
     .hint { position: absolute; left: 0; bottom: 8px; font-size: 11px; color: var(--muted); }
@@ -116,15 +119,17 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
       font-weight: 500; cursor: pointer; color: var(--black); display: flex; justify-content: space-between; gap: 16px; align-items: center;
       min-height: 44px;
     }
-    .fq button:hover { color: var(--red); }
-    .sign { color: var(--red); font-size: 22px; line-height: 1; transition: rotate .45s var(--ease); flex: 0 0 auto; }
+    @media (hover: hover) and (pointer: fine) {
+      .fq button:hover { color: var(--red); }
+      }
+    .sign { color: var(--red); font-size: 22px; line-height: 1; transition: rotate .25s var(--ease), scale .15s var(--ease); flex: 0 0 auto; }
     .faq.open .sign { rotate: 45deg; }
-    .fa { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s var(--ease), visibility .5s; visibility: hidden; }
-    .faq.open .fa { grid-template-rows: 1fr; visibility: visible; }
+    .fa { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .22s var(--ease), visibility .22s; visibility: hidden; }
+    .faq.open .fa { grid-template-rows: 1fr; visibility: visible; transition-duration: .3s; }
     .fain { overflow: hidden; min-height: 0; }
     .faw {
       display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 12px; padding: 0 0 18px;
-      opacity: 0; translate: 0 -6px; transition: opacity .35s, translate .5s var(--ease);
+      opacity: 0; translate: 0 -6px; transition: opacity .2s var(--ease), translate .3s var(--ease);
     }
     .faq.open .faw { opacity: 1; translate: 0 0; transition-delay: .08s; }
     .who { font-size: 11px; color: var(--red); padding-top: 4px; }
@@ -143,11 +148,11 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
       background: var(--black); color: var(--cream); border: 0; border-radius: var(--radius-pill); height: 44px;
       padding: 0 18px; font: inherit; font-size: 14px; cursor: pointer; white-space: nowrap;
     }
-    .send:hover { background: var(--red); }
     .note { font-size: 11px; color: var(--muted); margin-top: 10px; }
     @media (max-width: 760px) { .sec { padding: 56px 20px 24px; } }
     @media (prefers-reduced-motion: reduce) {
       .scott.jump { transform: none; }
+      @keyframes say-in { from { opacity: 0; } }
       .faw { translate: none; }
     }
   `,

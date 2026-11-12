@@ -18,15 +18,23 @@ import { ChapterService } from '../core/chapter';
   styles: `
     .mini {
       position: fixed; right: 22px; bottom: 18px; z-index: 30; display: flex; align-items: flex-end; gap: 8px;
-      text-decoration: none; opacity: 0; pointer-events: none; transition: opacity .4s, scale .18s var(--ease);
-      transform-origin: 100% 100%; -webkit-tap-highlight-color: transparent;
+      text-decoration: none; opacity: 0; pointer-events: none; translate: 0 14px;
+      transition: opacity .2s ease-out, translate .25s var(--ease), scale .15s var(--ease);
+      transform-origin: 100% 100%;
     }
-    .mini.on { opacity: 1; pointer-events: auto; }
+    .mini.on { opacity: 1; pointer-events: auto; translate: 0 0; transition-duration: .3s, .45s, .15s; }
     .say {
+      position: absolute; right: calc(100% + 8px); bottom: 0; width: max-content;
       background: var(--black); color: var(--cream); font-size: 13px; line-height: 1.35; padding: 9px 12px;
       border-radius: 14px 14px 4px 14px; max-width: 210px; margin-bottom: 40px;
+      transform-origin: 100% 100%; animation: say-in .22s var(--ease) both;
     }
-    img { width: 78px; height: auto; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .25)); }
+    @keyframes say-in { from { opacity: 0; scale: .92; translate: 0 6px; } }
+    @media (prefers-reduced-motion: reduce) {
+      .mini { translate: none; }
+      @keyframes say-in { from { opacity: 0; } }
+    }
+    img { width: 78px; height: auto; filter: drop-shadow(0 10px 14px rgba(0, 0, 0, .25)); will-change: translate; }
     @media (max-width: 760px) {
       .mini { right: 10px; bottom: 10px; }
       img { width: 50px; }

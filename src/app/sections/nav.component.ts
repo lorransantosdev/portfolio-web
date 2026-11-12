@@ -43,7 +43,7 @@ import { MotionService } from '../core/motion.service';
       display: flex; align-items: center; justify-content: space-between; gap: 16px;
     }
     .logo {
-      text-decoration: none; font-weight: 600; font-size: 17px; letter-spacing: -.02em;
+      min-height: 44px; text-decoration: none; font-weight: 600; font-size: 17px; letter-spacing: -.02em;
       display: inline-flex; align-items: center; gap: 10px; white-space: nowrap;
     }
     .mark {
@@ -67,7 +67,7 @@ import { MotionService } from '../core/motion.service';
       text-decoration: none; font-size: 14px; font-weight: 500; padding: 10px 16px;
       border-radius: var(--radius-pill); background: var(--black); color: var(--cream); white-space: nowrap;
     }
-    .cv:hover { color: var(--cream); background: #1a1a1a; }
+    @media (hover: hover) and (pointer: fine) { .cv:hover { color: var(--cream); background: #1a1a1a; } }
     .prog {
       position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%;
       transform-origin: 0 50%; transform: scaleX(0); background: var(--red);

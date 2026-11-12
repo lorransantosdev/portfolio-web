@@ -20,20 +20,22 @@ interface Cell {
   st: number; th: number; r: number;
 }
 
-const FLY = .7;
+const FLY = .55;
 
 @Component({
   selector: 'app-binary-portrait',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `<canvas #cv role="img" [attr.aria-label]="label()"></canvas>`,
+  template: `<canvas #cv role="img" [attr.aria-label]="label()"></canvas><canvas #fx class="fx" aria-hidden="true"></canvas>`,
   styles: `
-    :host { display: block; }
+    :host { display: block; position: relative; }
     canvas { width: 100%; aspect-ratio: 700 / 648; display: block; cursor: crosshair; touch-action: pan-y; }
+    .fx { position: absolute; inset: 0; pointer-events: none; }
   `,
 })
 export class BinaryPortraitComponent {
   readonly label = input.required<string>();
   private cv = viewChild.required<ElementRef<HTMLCanvasElement>>('cv');
+  private fx = viewChild.required<ElementRef<HTMLCanvasElement>>('fx');
   private motion = inject(MotionService);
   private destroyRef = inject(DestroyRef);
   private destroyed = false;
@@ -127,40 +129,43 @@ export class BinaryPortraitComponent {
     };
 
     let flying = !calm;
-    // quem já chegou vai pra uma camada fixa; por quadro só se desenha quem ainda está voando
-    const base = document.createElement('canvas');
-    base.width = cv.width; base.height = cv.height;
-    const bctx = base.getContext('2d')!;
-    bctx.setTransform(res, 0, 0, res, 0, 0);
+    // durante a montagem quem chegou é carimbado uma vez no canvas principal;
+    // só os dígitos em voo são redesenhados, numa camada transparente por cima
+    const fx = this.fx().nativeElement;
     const lite = cv.clientWidth > 0 && cv.clientWidth < 500;
+    const flies = cells.map((q, i) => !lite || (q.a >= .45 && i % 3 === 0));
+    let fctx: CanvasRenderingContext2D | null = null;
+    if (flying) {
+      const fres = lite ? res * .7 : res;
+      fx.width = Math.round(FW * fres); fx.height = Math.round(FH * fres);
+      fctx = fx.getContext('2d')!;
+      fctx.setTransform(fres, 0, 0, fres, 0, 0);
+    } else fx.remove();
     const fly = (el: number) => {
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.clearRect(0, 0, cv.width, cv.height);
-      ctx.globalAlpha = 1;
-      ctx.drawImage(base, 0, 0);
-      ctx.setTransform(res, 0, 0, res, 0, 0);
+      const f = fctx!;
+      f.clearRect(0, 0, FW, FH);
       let left = 0;
       for (let i = 0; i < cells.length; i++) {
         const q = cells[i];
         if (q.st === STEPS) continue;
-        const p = Math.min(1, Math.max(0, (el - q.delay) / FLY));
+        const p = (el - q.delay) / FLY;
         if (p >= 1) {
-          q.st = STEPS; q.x = q.hx; q.y = q.hy;
-          bctx.globalAlpha = q.a;
-          bctx.drawImage(GB[q.d], q.hx - 8, q.hy - 8, 16, 16);
+          q.st = STEPS;
           put(q, false, q.a);
           continue;
         }
         left++;
-        if (p <= 0 || (lite && (q.a < .35 || i % 3 === 0))) continue;
-        const e = 1 - Math.pow(1 - p, 4);
+        if (p <= 0 || !flies[i]) continue;
+        const e = 1 - (1 - p) * (1 - p) * (1 - p) * (1 - p);
         const ang = q.th + (1 - e) * 2.4, rad = q.r * (1 + (1 - e) * .7);
-        q.x = cx + Math.cos(ang) * rad; q.y = cy + Math.sin(ang) * rad;
-        put(q, true, Math.min(1, p * 2.5) * Math.max(.55, q.a));
+        f.globalAlpha = Math.min(1, p * 2.5) * Math.max(.55, q.a);
+        f.drawImage(GR[q.d], cx + Math.cos(ang) * rad - 8, cy + Math.sin(ang) * rad - 8, 16, 16);
       }
       ctx.globalAlpha = 1;
       if (left) return;
       flying = false;
+      fx.remove();
+      fx.width = fx.height = 0;
       cells.forEach((q) => { q.vx = q.vy = 0; });
       pending = 0;
     };

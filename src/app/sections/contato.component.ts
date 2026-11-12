@@ -57,7 +57,7 @@ import { LINKS } from '../content/shared';
     .ctas { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
     .cta { height: 56px; padding: 0 26px; font-size: 16px; }
     .cta.light { background: var(--cream); color: var(--black); }
-    .cta.light:hover { color: var(--red); }
+    @media (hover: hover) and (pointer: fine) { .cta.light:hover { color: var(--red); } }
     .cta.line { border-color: rgba(249, 242, 234, .35); padding: 0 24px; }
     .photo { width: 240px; height: auto; aspect-ratio: 3 / 4; object-fit: cover; border-radius: var(--radius-card); margin-top: 44px; display: block; }
     .find { font-size: 12px; font-weight: 400; opacity: .55; margin: 0 0 10px; }

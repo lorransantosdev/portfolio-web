@@ -51,9 +51,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 a { color: inherit; }
-a:hover { color: var(--red); }
 img { max-width: 100%; }
 button { font: inherit; }
+a, button, input, label { touch-action: manipulation; }
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
 :focus-visible { outline: 2px solid var(--red); outline-offset: 3px; border-radius: 4px; }
 
 .sr-only {
@@ -75,21 +77,18 @@ button { font: inherit; }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
 .bob { display: inline-block; animation: bob 1.6s var(--ease-io) infinite; color: var(--red); }
 
-.lift { transition: translate .35s var(--ease), box-shadow .35s; }
-.lift:hover { translate: 0 -6px; box-shadow: 0 40px 60px -36px rgba(0, 0, 0, .45); }
+.lift { transition: translate .35s var(--ease), box-shadow .35s var(--ease); }
 
 .ul {
   text-decoration: none;
   background-image: linear-gradient(currentColor, currentColor);
   background-size: 0% 1px; background-repeat: no-repeat; background-position: 0 100%;
-  transition: background-size .35s;
+  transition: background-size .35s var(--ease);
 }
-.ul:hover { background-size: 100% 1px; }
 
-.crow { transition: padding .25s, color .25s; text-decoration: none; }
-.crow:hover { padding-left: 12px !important; color: var(--red) !important; }
-.crow .carr { color: var(--red); transition: translate .25s; }
-.crow:hover .carr { translate: 4px -4px; }
+.crow { transition: color .2s ease; text-decoration: none; }
+.crow > * { transition: translate .3s var(--ease); }
+.crow .carr { color: var(--red); }
 
 .btn {
   text-decoration: none; height: 46px; display: inline-flex; align-items: center;
@@ -97,7 +96,6 @@ button { font: inherit; }
   border: 1px solid transparent; white-space: nowrap;
 }
 .btn-dark { background: var(--black); color: var(--cream); }
-.btn-dark:hover { color: var(--cream); background: #1a1a1a; }
 .btn-line { border-color: rgba(0, 0, 0, .25); }
 .btn-lg { height: 50px; padding: 0 22px; font-size: 16px; }
 
@@ -132,14 +130,24 @@ button { font: inherit; }
 .autogrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(var(--min, 300px), 1fr)); gap: var(--gap, 48px); }
 @media (max-width: 760px) { .autogrid { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
 
+@media (hover: hover) and (pointer: fine) {
+  a:hover { color: var(--red); }
+  .lift:hover { translate: 0 -6px; box-shadow: 0 40px 60px -36px rgba(0, 0, 0, .45); }
+  .ul:hover { background-size: 100% 1px; }
+  .crow:hover { color: var(--red) !important; }
+  .crow:hover > :not(.carr) { translate: 12px 0; }
+  .crow:hover .carr { translate: 4px -4px; }
+  .btn-dark:hover { color: var(--cream); background: #1a1a1a; }
+}
+
 @media (pointer: coarse) {
   .tap { min-height: 44px; display: inline-flex; align-items: center; }
 }
 
 @media (hover: none) {
-  .btn, .tap, .press { transition: scale .18s var(--ease); }
-  .lift { transition: translate .35s var(--ease), box-shadow .35s, scale .18s var(--ease); }
-  .crow { transition: padding .25s, color .25s, scale .18s var(--ease); }
+  .btn, .tap, .press { transition: scale .15s var(--ease); }
+  .lift { transition: translate .35s var(--ease), box-shadow .35s var(--ease), scale .15s var(--ease); }
+  .crow { transition: color .2s ease, scale .15s var(--ease); }
   .btn:active, .tap:active, .press:active, .lift:active, .crow:active { scale: .97; }
 }
 

@@ -58,6 +58,8 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
     .rows { display: flex; flex-direction: column; margin-top: 24px; max-width: 460px; }
     .r { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
     .r.last { border-bottom: 1px solid var(--line); }
+    .r a { position: relative; }
+    .r a::after { content: ''; position: absolute; inset: -12px 0; }
     .post { font-size: 12px; opacity: .55; }
     .res { color: var(--red); font-weight: 600; white-space: nowrap; }
     .photos { position: relative; height: 560px; }

@@ -16,7 +16,7 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
         <h3 class="aititle">{{ t().mycarshub.aiTitle.a }}<br />{{ t().mycarshub.aiTitle.b }}<em>{{ t().mycarshub.aiTitle.em }}</em>{{ t().mycarshub.aiTitle.c }}</h3>
         <div class="steps">
           @for (c of t().mycarshub.steps; track c.n; let i = $index) {
-            <button type="button" class="step" [class.on]="i === step()" [attr.aria-pressed]="i === step()" (click)="go(i)">
+            <button type="button" class="step press" [class.on]="i === step()" [attr.aria-pressed]="i === step()" (click)="go(i)">
               <span class="sn mono" aria-hidden="true">{{ c.n }}</span>
               <span class="sb"><span class="st">{{ c.t }}</span><span class="sd">{{ c.d }}</span></span>
             </button>
@@ -53,7 +53,8 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
       cursor: pointer; text-align: left;
     }
     .sb { opacity: .62; transition: opacity .3s; }
-    .step.on .sb, .step:hover .sb { opacity: 1; }
+    .step.on .sb { opacity: 1; }
+    @media (hover: hover) and (pointer: fine) { .step:hover .sb { opacity: 1; } }
     .sn { font-size: 12px; color: var(--red-on-dark); width: 26px; flex: 0 0 auto; }
     .sb { display: flex; flex-direction: column; text-align: left; }
     .st { font-size: 17px; font-weight: 600; }

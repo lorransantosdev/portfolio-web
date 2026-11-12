@@ -1,7 +1,10 @@
 import { Directive, ElementRef, afterNextRender, inject, input, DestroyRef } from '@angular/core';
 import { MotionService } from './motion.service';
 
-@Directive({ selector: '[countUp]', host: { '[textContent]': 'format(countUp())' } })
+@Directive({
+  selector: '[countUp]',
+  host: { '[textContent]': 'format(countUp())', style: 'display: inline-block; font-variant-numeric: tabular-nums' },
+})
 export class CountUpDirective {
   readonly countUp = input.required<number>();
   readonly locale = input('pt-BR');
@@ -17,8 +20,10 @@ export class CountUpDirective {
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
       const el = this.el;
-      if (el.getBoundingClientRect().top > window.innerHeight) el.textContent = this.format(0);
-      else return; // já visível no carregamento: mostra o valor final direto
+      const box = el.getBoundingClientRect();
+      if (box.top <= window.innerHeight) return;
+      el.style.minWidth = box.width + 'px';
+      el.textContent = this.format(0);
       let stopTick = () => {};
       const stop = this.motion.observe(el, (e) => {
         if (!e.isIntersecting) return;
