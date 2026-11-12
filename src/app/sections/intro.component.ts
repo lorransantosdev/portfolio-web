@@ -71,7 +71,7 @@ export class IntroComponent {
             });
             if (first) {
               first = false;
-              requestAnimationFrame(() => words.forEach((w) => (w.style.transition = 'opacity .45s var(--ease)')));
+              requestAnimationFrame(() => words.forEach((w) => (w.style.transition = 'opacity var(--stagger-dur) var(--ease-smooth-out)')));
             }
           });
         },

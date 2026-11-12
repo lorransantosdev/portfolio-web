@@ -4,13 +4,18 @@ import { RevealDirective } from '../core/reveal.directive';
 import { RiseComponent } from '../core/rise.component';
 import { MagneticDirective } from '../core/magnetic.directive';
 import { ChapterDirective } from '../core/chapter';
+import { DecryptComponent } from '../core/decrypt.component';
+import { ArrowComponent, ArrowLabelComponent } from '../core/arrow-label.component';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
 import { LINKS } from '../content/shared';
 
 @Component({
   selector: 'app-contato',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, RiseComponent, MagneticDirective, ChapterDirective, BinaryShapeComponent],
+  imports: [
+    RevealDirective, RiseComponent, MagneticDirective, ChapterDirective, DecryptComponent, ArrowComponent,
+    ArrowLabelComponent, BinaryShapeComponent,
+  ],
   template: `
     <footer id="contato" [chapter]="t().contato.chapter" class="dark" aria-labelledby="contato-t">
       <div class="inner">
@@ -19,19 +24,19 @@ import { LINKS } from '../content/shared';
           <h2 id="contato-t" class="title" [rise]="t().contato.titleA" [em]="t().contato.titleEm"></h2>
           <p class="lead">{{ t().contato.lead }}</p>
           <div class="ctas">
-            <a magnetic class="btn cta light" [href]="links.mailto">{{ t().contato.ctaMail }}</a>
-            <a magnetic class="btn cta line" [href]="links.whatsapp">{{ t().contato.ctaWhats }}</a>
+            <a magnetic class="btn cta light" [href]="links.mailto" [arrowLabel]="t().contato.ctaMail"></a>
+            <a magnetic class="btn cta line" [href]="links.whatsapp" [arrowLabel]="t().contato.ctaWhats"></a>
           </div>
           <img reveal="clip" class="photo" src="assets/lorran-contato.webp" width="506" height="675" [alt]="t().contato.photoAlt" loading="lazy" decoding="async" />
         </div>
         <div class="col2">
-          <h3 class="find mono">{{ t().contato.findLabel }}</h3>
+          <h3 class="find mono" [decrypt]="t().contato.findLabel"></h3>
           <div class="rows">
             @for (r of t().contato.rows; track r.k; let last = $last) {
               <a class="crow row" [class.big]="r.big" [class.last]="last" [href]="r.href">
                 <span class="k mono">{{ r.k }}</span>
-                <span class="v">{{ r.v }}</span>
-                <span class="carr" aria-hidden="true">↗</span>
+                <span class="v">{{ head(r.v) }}<wbr />{{ tail(r.v) }}</span>
+                <span class="carr"><app-arrow /></span>
               </a>
             }
           </div>
@@ -53,7 +58,7 @@ import { LINKS } from '../content/shared';
     .col2 { flex: 1 1 460px; min-width: 0; padding-top: 12px; }
     .env { margin-bottom: 26px; }
     .title { margin: 22px 0 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(64px, 8vw, 124px); line-height: .86; letter-spacing: -.03em; }
-        .lead { font-size: 18px; line-height: 1.55; opacity: .8; margin: 22px 0 0; max-width: 440px; }
+    .lead { font-size: 18px; line-height: 1.55; opacity: .8; margin: 22px 0 0; max-width: 440px; }
     .ctas { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
     .cta { height: 56px; padding: 0 26px; font-size: 16px; }
     .cta.light { background: var(--cream); color: var(--black); }
@@ -69,12 +74,13 @@ import { LINKS } from '../content/shared';
     .row.big { padding: 18px 0; }
     .row.last { border-bottom: 1px solid var(--line-dark); }
     .k { font-size: 12px; opacity: .55; }
-    .v { font-size: 18px; font-weight: 500; letter-spacing: -.01em; overflow-wrap: anywhere; }
+    .v { font-size: 18px; font-weight: 500; letter-spacing: -.01em; overflow-wrap: break-word; min-width: 0; }
     .row.big .v { font-size: clamp(20px, 2.2vw, 28px); }
     .foot {
-      max-width: var(--container); margin: 0 auto; padding: 24px var(--pad-x); border-top: 1px solid var(--line-dark);
+      position: relative; max-width: var(--container); margin: 0 auto; padding: 24px var(--pad-x);
       display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px; opacity: .7;
     }
+    .foot::before { content: ''; position: absolute; top: 0; left: var(--pad-x); right: var(--pad-x); height: 1px; background: var(--line-dark); }
     .fl { display: inline-flex; align-items: center; gap: 8px; }
     .fmark { width: 18px; height: 18px; }
     @media (max-width: 760px) {
@@ -87,4 +93,7 @@ import { LINKS } from '../content/shared';
 export class ContatoComponent {
   readonly t = inject(I18n).t;
   readonly links = LINKS;
+
+  head = (v: string) => (v.indexOf('@') > 0 ? v.slice(0, v.indexOf('@')) : v);
+  tail = (v: string) => (v.indexOf('@') > 0 ? v.slice(v.indexOf('@')) : '');
 }

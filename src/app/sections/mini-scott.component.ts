@@ -19,15 +19,15 @@ import { ChapterService } from '../core/chapter';
     .mini {
       position: fixed; right: 22px; bottom: 18px; z-index: 30; display: flex; align-items: flex-end; gap: 8px;
       text-decoration: none; opacity: 0; pointer-events: none; translate: 0 14px;
-      transition: opacity .2s ease-out, translate .25s var(--ease), scale .15s var(--ease);
+      transition: opacity var(--toast-close) var(--ease-smooth-out), translate var(--toast-close) var(--ease-smooth-out), scale var(--duration-quick) var(--ease-smooth-out);
       transform-origin: 100% 100%;
     }
-    .mini.on { opacity: 1; pointer-events: auto; translate: 0 0; transition-duration: .3s, .45s, .15s; }
+    .mini.on { opacity: 1; pointer-events: auto; translate: 0 0; transition-duration: var(--toast-open), var(--toast-open), var(--duration-quick); }
     .say {
       position: absolute; right: calc(100% + 8px); bottom: 0; width: max-content;
       background: var(--black); color: var(--cream); font-size: 13px; line-height: 1.35; padding: 9px 12px;
       border-radius: 14px 14px 4px 14px; max-width: 210px; margin-bottom: 40px;
-      transform-origin: 100% 100%; animation: say-in .22s var(--ease) both;
+      transform-origin: 100% 100%; animation: say-in var(--duration-fast) var(--ease-bounce) both;
     }
     @keyframes say-in { from { opacity: 0; scale: .92; translate: 0 6px; } }
     @media (prefers-reduced-motion: reduce) {

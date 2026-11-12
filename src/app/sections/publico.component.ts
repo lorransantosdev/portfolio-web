@@ -3,12 +3,14 @@ import { I18n } from '../core/i18n';
 import { RevealDirective } from '../core/reveal.directive';
 import { RiseComponent } from '../core/rise.component';
 import { ChapterDirective } from '../core/chapter';
+import { DecryptComponent } from '../core/decrypt.component';
+import { ArrowComponent } from '../core/arrow-label.component';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
 
 @Component({
   selector: 'app-publico',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, RiseComponent, ChapterDirective, BinaryShapeComponent],
+  imports: [RevealDirective, RiseComponent, ChapterDirective, DecryptComponent, ArrowComponent, BinaryShapeComponent],
   template: `
     <section id="publico" [chapter]="t().publico.chapter" [say]="t().publico.say" class="sec" aria-labelledby="pub-t">
       <div class="autogrid grid">
@@ -23,11 +25,11 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
           </div>
         </div>
         <div>
-          <h3 class="label mono">{{ t().publico.postsLabel }}</h3>
+          <h3 class="label mono" [decrypt]="t().publico.postsLabel"></h3>
           @for (p of t().publico.posts; track $index; let last = $last) {
             <a reveal class="crow row" [class.last]="last" [href]="p.href">
               <span><span class="pt">{{ p.title }}</span><span class="ps">{{ p.sub }}</span></span>
-              <span class="carr" aria-hidden="true">↗</span>
+              <span class="carr"><app-arrow /></span>
             </a>
           }
         </div>

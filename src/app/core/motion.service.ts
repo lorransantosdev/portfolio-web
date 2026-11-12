@@ -18,6 +18,12 @@ export class MotionService {
     if (this.coarse) document.addEventListener('touchstart', () => {}, { passive: true });
   }
 
+  ms(name: string, fallback: number): number {
+    if (!this.isBrowser) return fallback;
+    const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name));
+    return Number.isNaN(v) ? fallback : v;
+  }
+
   haptic(ms = 10): void {
     if (this.coarse && typeof navigator.vibrate === 'function') navigator.vibrate(ms);
   }

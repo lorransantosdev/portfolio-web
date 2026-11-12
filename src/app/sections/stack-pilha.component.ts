@@ -44,9 +44,9 @@ import { MotionService } from '../core/motion.service';
     .layer {
       display: grid; grid-template-columns: 64px 150px minmax(0, 1fr); gap: 18px; align-items: baseline;
       padding: 18px 14px; border-top: 1px solid rgba(0, 0, 0, .16);
-      transition: background-color .3s ease, color .3s ease; cursor: default;
+      transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); cursor: default;
     }
-    .layer > * { transition: translate .3s var(--ease); }
+    .layer > * { transition: translate var(--duration-fast) var(--ease-smooth-out); }
     .layer.last { border-bottom: 1px solid rgba(0, 0, 0, .16); }
     .layer.on { background: var(--black); color: var(--cream); }
     .layer.on > * { translate: 12px 0; }
@@ -97,6 +97,7 @@ export class StackPilhaComponent {
         const box = L.querySelector<HTMLElement>('.items')!;
         let stop: (() => void) | null = null;
         const enter = () => {
+          if (motion.reduced) return;
           stop?.();
           // os dígitos quebram a linha em outro ponto: segura a altura enquanto troca
           nodes.forEach((n, j) => (n.nodeValue = orig[j]));
@@ -150,12 +151,13 @@ export class StackPilhaComponent {
         (e) => {
           if (!e.isIntersecting) return;
           stopIO();
+          const dur = motion.ms('--stagger-dur', 500), gap = motion.ms('--duration-stagger', 40);
           layers.forEach((L, i) =>
             L.animate(
               motion.reduced
                 ? [{ opacity: 0 }, { opacity: 1 }]
                 : [{ opacity: 0, translate: '0 -36px', scale: '.98' }, { opacity: 1, translate: '0 0', scale: '1' }],
-              { duration: 640, delay: i * 90, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' },
+              { duration: dur, delay: i * gap, easing: 'cubic-bezier(.22, 1, .36, 1)', fill: 'backwards' },
             ),
           );
         },

@@ -5,6 +5,8 @@ import { I18n } from '../core/i18n';
 import { MotionService } from '../core/motion.service';
 import { ChapterDirective } from '../core/chapter';
 import { RiseComponent } from '../core/rise.component';
+import { DecryptComponent } from '../core/decrypt.component';
+import { ArrowLabelComponent } from '../core/arrow-label.component';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
 import { LINKS } from '../content/shared';
 import { ScottPose } from '../content/types';
@@ -21,7 +23,7 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
 @Component({
   selector: 'app-scott',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChapterDirective, RiseComponent, BinaryShapeComponent],
+  imports: [ChapterDirective, RiseComponent, DecryptComponent, ArrowLabelComponent, BinaryShapeComponent],
   template: `
     <section #sec id="scott" [chapter]="t().scott.chapter" class="sec" aria-labelledby="scott-faq-t">
       <div class="autogrid grid">
@@ -67,29 +69,37 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
             }
           </div>
           <form class="form" (submit)="submit($event)">
-            <label for="sq" class="mono">{{ t().scott.formLabel }}</label>
+            <label for="sq" class="mono" [decrypt]="t().scott.formLabel"></label>
             <div class="field">
               <input id="sq" name="q" [value]="input()" (input)="input.set($any($event.target).value)"
                 [placeholder]="t().scott.placeholder" autocomplete="off" />
-              <button type="submit" class="send press">{{ t().scott.send }}</button>
+              <button type="submit" class="send press" [arrowLabel]="t().scott.send"></button>
             </div>
             <div class="note mono">{{ t().scott.formNote }}</div>
           </form>
         </div>
       </div>
+      <div class="toast" [class.is-open]="toast()" role="status">
+        @if (toastText()) {
+          <span class="check" [attr.data-state]="toast() ? 'in' : 'out'" aria-hidden="true">
+            <svg viewBox="0 0 16 16"><path d="M3.5 8.5l3 3 6-7" /></svg>
+          </span>
+          <span>{{ toastText() }}</span>
+        }
+      </div>
     </section>
   `,
   styles: `
     :host { display: block; }
-    .sec { max-width: var(--container); margin: 0 auto; padding: 100px var(--pad-x) 120px; }
-    .grid { --min: 300px; --gap: 56px; margin-top: 28px; align-items: start; }
+    .sec { max-width: var(--container); margin: 0 auto; padding: 100px var(--pad-x) 64px; }
+    .grid { --min: 300px; margin-top: 28px; align-items: start; }
     .left { position: relative; }
     .stage { position: relative; }
     .disc { position: absolute; left: 12%; right: 12%; bottom: 4%; aspect-ratio: 1; border-radius: 50%; background: var(--red); }
     .bubble {
       position: absolute; right: 4%; top: 6%; z-index: 4; background: var(--black); color: var(--cream);
       font-size: 15px; padding: 10px 14px; border-radius: 16px 16px 4px 16px; max-width: 200px;
-      transform-origin: 100% 100%; animation: say-in .22s var(--ease) both;
+      transform-origin: 100% 100%; animation: say-in var(--duration-fast) var(--ease-bounce) both;
     }
     @keyframes say-in { from { opacity: 0; scale: .92; translate: 0 6px; } }
     .mono-h { font-family: var(--font-mono); font-size: 16px; font-weight: 600; }
@@ -100,7 +110,7 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
     .scott {
       position: relative; display: block; width: 78%; max-width: 380px; margin: 0 auto; height: auto;
       aspect-ratio: 520 / 481; object-fit: contain; object-position: 50% 100%;
-      transform-origin: 50% 100%; transition: transform .45s cubic-bezier(.34, 1.56, .64, 1); will-change: rotate, scale;
+      transform-origin: 50% 100%; transition: transform var(--duration-very-slow) var(--ease-bounce); will-change: rotate, scale;
     }
     .scott.jump { transform: translateY(-34px); }
     .hint { position: absolute; left: 0; bottom: 8px; font-size: 11px; color: var(--muted); }
@@ -110,7 +120,7 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
     .desc { font-size: 15px; color: var(--body); margin-top: 4px; }
 
     .ftitle { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(36px, 4vw, 52px); line-height: 1; letter-spacing: -.02em; }
-        .flead { font-size: 16px; color: var(--body); margin: 14px 0 0; }
+    .flead { font-size: 16px; color: var(--body); margin: 14px 0 0; }
     .faqs { display: flex; flex-direction: column; margin-top: 22px; border-bottom: 1px solid var(--line); }
     .faq { border-top: 1px solid var(--line); }
     .fq { margin: 0; font: inherit; }
@@ -122,16 +132,17 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
     @media (hover: hover) and (pointer: fine) {
       .fq button:hover { color: var(--red); }
       }
-    .sign { color: var(--red); font-size: 22px; line-height: 1; transition: rotate .25s var(--ease), scale .15s var(--ease); flex: 0 0 auto; }
+    .sign { color: var(--red); font-size: 22px; line-height: 1; transition: rotate var(--acc-dur) var(--ease-smooth-out), scale var(--duration-quick) var(--ease-smooth-out); flex: 0 0 auto; }
     .faq.open .sign { rotate: 45deg; }
-    .fa { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .22s var(--ease), visibility .22s; visibility: hidden; }
-    .faq.open .fa { grid-template-rows: 1fr; visibility: visible; transition-duration: .3s; }
+    .fa { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--acc-dur) var(--ease-smooth-out), visibility var(--acc-dur); visibility: hidden; }
+    .faq.open .fa { grid-template-rows: 1fr; visibility: visible; }
     .fain { overflow: hidden; min-height: 0; }
     .faw {
       display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 12px; padding: 0 0 18px;
-      opacity: 0; translate: 0 -6px; transition: opacity .2s var(--ease), translate .3s var(--ease);
+      opacity: 0; translate: 0 calc(var(--distance-small) * -1); filter: blur(var(--blur-small));
+      transition: opacity var(--acc-dur) var(--ease-smooth-out), translate var(--acc-dur) var(--ease-smooth-out), filter var(--acc-dur) var(--ease-smooth-out);
     }
-    .faq.open .faw { opacity: 1; translate: 0 0; transition-delay: .08s; }
+    .faq.open .faw { opacity: 1; translate: 0 0; filter: blur(0); }
     .who { font-size: 11px; color: var(--red); padding-top: 4px; }
     .ans { font-size: 16px; line-height: 1.6; color: var(--body-2); }
 
@@ -148,12 +159,51 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
       background: var(--black); color: var(--cream); border: 0; border-radius: var(--radius-pill); height: 44px;
       padding: 0 18px; font: inherit; font-size: 14px; cursor: pointer; white-space: nowrap;
     }
+    .toast {
+      position: fixed; left: 50%; bottom: 24px; z-index: 40; display: flex; align-items: center; gap: 10px;
+      background: var(--black); color: var(--cream); font-size: 14px; padding: 12px 18px 12px 14px; border-radius: var(--radius-pill);
+      box-shadow: 0 20px 40px -18px rgba(0, 0, 0, .5); pointer-events: none; white-space: nowrap;
+      opacity: 0; transform: translate(-50%, var(--toast-distance)) scale(var(--scale-medium)); filter: blur(var(--blur-small));
+      transition:
+        opacity var(--toast-close) var(--ease-smooth-out), transform var(--toast-close) var(--ease-smooth-out),
+        filter var(--toast-close) var(--ease-smooth-out);
+    }
+    .toast.is-open {
+      opacity: 1; transform: translate(-50%, 0) scale(1); filter: blur(0);
+      transition-duration: var(--toast-open);
+    }
+    .check {
+      display: inline-flex; width: 22px; height: 22px; border-radius: 50%; background: var(--red);
+      align-items: center; justify-content: center; opacity: 0;
+    }
+    .check svg { width: 14px; height: 14px; display: block; overflow: visible; }
+    .check path {
+      fill: none; stroke: var(--cream); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+      stroke-dasharray: 15; stroke-dashoffset: 15;
+    }
+    .check[data-state='in'] {
+      animation:
+        check-fade var(--check-dur) var(--ease-smooth-out) forwards,
+        check-rotate var(--check-dur) var(--ease-smooth-out) forwards,
+        check-blur var(--check-dur) var(--ease-smooth-out) forwards,
+        check-bob var(--check-dur) var(--check-ease-bob) forwards;
+    }
+    .check[data-state='in'] path { animation: check-draw var(--check-dur) var(--ease-smooth-out) var(--duration-micro) forwards; }
+    @keyframes check-fade { to { opacity: 1; } }
+    @keyframes check-rotate { from { rotate: var(--check-rotate-from); } }
+    @keyframes check-blur { from { filter: blur(var(--check-blur-from)); } }
+    @keyframes check-bob { from { translate: 0 var(--check-y-amount); } }
+    @keyframes check-draw { to { stroke-dashoffset: 0; } }
     .note { font-size: 11px; color: var(--muted); margin-top: 10px; }
     @media (max-width: 760px) { .sec { padding: 56px 20px 24px; } }
+    @media (max-width: 760px) { .toast { bottom: 16px; } }
     @media (prefers-reduced-motion: reduce) {
       .scott.jump { transform: none; }
       @keyframes say-in { from { opacity: 0; } }
-      .faw { translate: none; }
+      .faw { translate: none; filter: none; }
+      .toast { transform: translate(-50%, 0); filter: none; }
+      .check[data-state='in'] { animation: check-fade var(--check-dur) var(--ease-smooth-out) forwards; }
+      .check[data-state='in'] path { animation: none; stroke-dashoffset: 0; }
     }
   `,
 })
@@ -168,6 +218,8 @@ export class ScottComponent {
   readonly zoom = signal(false);
   readonly open = signal(0);
   readonly input = signal('');
+  readonly toast = signal(false);
+  readonly toastText = signal('');
 
   private sec = viewChild.required<ElementRef<HTMLElement>>('sec');
   private img = viewChild.required<ElementRef<HTMLImageElement>>('img');
@@ -255,7 +307,10 @@ export class ScottComponent {
       `${LINKS.mailto}?subject=${encodeURIComponent(this.t().scott.mailSubject)}&body=${encodeURIComponent(q)}`;
     window.location.href = href;
     this.input.set('');
-    this.say(this.t().scott.sendSay, 1800);
+    this.toastText.set(this.t().scott.sendSay);
+    this.toast.set(true);
+    this.later('toast', 2600, () => this.toast.set(false));
+    this.later('toastText', 2600 + this.motion.ms('--toast-close', 250), () => this.toastText.set(''));
     this.bounce(1200);
   }
 

@@ -2,14 +2,16 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { I18n } from '../core/i18n';
 import { RevealDirective } from '../core/reveal.directive';
 import { DriftDirective } from '../core/drift.directive';
-import { CountUpDirective } from '../core/countup.directive';
+import { CountUpComponent } from '../core/countup.component';
 import { ChapterDirective } from '../core/chapter';
+import { TiltDirective } from '../core/tilt.directive';
+import { ArrowLabelComponent } from '../core/arrow-label.component';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
 
 @Component({
   selector: 'app-fiap',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, DriftDirective, CountUpDirective, ChapterDirective, BinaryShapeComponent],
+  imports: [RevealDirective, DriftDirective, CountUpComponent, ChapterDirective, TiltDirective, ArrowLabelComponent, BinaryShapeComponent],
   template: `
     <section [chapter]="t().fiap.chapter" class="sec" aria-label="FIAP">
       <div class="autogrid grid">
@@ -24,7 +26,7 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
             @for (r of t().fiap.rows; track $index; let last = $last) {
               <div reveal class="r" [class.last]="last">
                 @if (r.href) {
-                  <a class="ul" [href]="r.href">{{ r.label }} <span class="post">{{ t().fiap.postLabel }}</span></a>
+                  <a class="ul" [href]="r.href">{{ r.label }} <span class="post" [arrowLabel]="t().fiap.postLabel"></span></a>
                 } @else {
                   <span>{{ r.label }}</span>
                 }
@@ -35,8 +37,8 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
         </div>
         <div class="photos">
           @for (ph of t().fiap.photos; track ph.src; let i = $index) {
-            <div class="pol" [class.p2]="i === 1" [drift]="i ? -.07 : .06">
-              <figure reveal="clip" class="lift card">
+            <div class="pol" [class.p2]="i === 1" [drift]="i ? -.07 : .06" [tilt]="12">
+              <figure reveal="clip" class="lift card tilt-card">
                 <img [src]="ph.src" [alt]="ph.alt" loading="lazy" decoding="async" width="506" height="675" />
                 <figcaption class="mono">{{ ph.caption }}</figcaption>
               </figure>
@@ -66,10 +68,17 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
     .pol { position: absolute; left: 0; top: 30px; width: 58%; }
     .pol.p2 { left: auto; right: 0; top: 0; width: 56%; }
     .card {
-      margin: 0; background: var(--white); padding: 10px 10px 14px;
-      box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .45); transform: rotate(-4deg);
+      --rot: -4deg; position: relative; margin: 0; background: var(--white); padding: 10px 10px 14px;
+      box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .45); transform: rotate(var(--rot));
     }
-    .p2 .card { transform: rotate(5deg); }
+    .p2 .card { --rot: 5deg; }
+    @media (hover: hover) and (pointer: fine) {
+      .card {
+        transform: perspective(var(--tilt-perspective)) rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg)) rotate(var(--rot));
+        transition: transform var(--tilt-return) var(--ease-smooth-out), translate var(--duration-medium) var(--ease-smooth-out), box-shadow var(--duration-medium) var(--ease-smooth-out);
+      }
+      .card.is-tilting { transition-duration: var(--tilt-follow), var(--duration-fast), var(--duration-fast); }
+    }
     .card img { width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; display: block; }
     figcaption { font-size: 11px; margin-top: 10px; }
     @media (max-width: 760px) {

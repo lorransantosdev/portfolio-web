@@ -1,9 +1,9 @@
 import {
-  ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, inject, viewChild,
+  ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, inject, signal, viewChild,
 } from '@angular/core';
 import { I18n } from '../core/i18n';
 import { MotionService } from '../core/motion.service';
-import { CountUpDirective } from '../core/countup.directive';
+import { CountUpComponent } from '../core/countup.component';
 import { GH_LEVELS, GH_START, GH_TOTAL } from '../content/shared';
 import { FONT_MONO, dprCap, fontsReady } from '../binary/shapes';
 
@@ -14,10 +14,12 @@ const GF = 44; // tamanho da fonte dentro do glifo
 
 interface Cell { l: number; c: number; r: number; d: Date; g: '0' | '1'; s: number }
 
+const DOTS = Array.from({ length: 16 }, (_, i) => i % 4);
+
 @Component({
   selector: 'app-github-grid',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CountUpDirective],
+  imports: [CountUpComponent],
   template: `
     <div class="head">
       <div>
@@ -32,7 +34,10 @@ interface Cell { l: number; c: number; r: number; d: Date; g: '0' | '1'; s: numb
     </div>
     <div class="gwrap">
       <canvas #cv class="gh" role="img" [attr.aria-label]="t().mycarshub.ghAria"></canvas>
-      <div #tip class="ghtip mono" aria-hidden="true"></div>
+      @if (!ready()) {
+        <div class="mx" aria-hidden="true">@for (c of dots; track $index) {<i [style.--d]="c"></i>}</div>
+      }
+      <div #tip class="ghtip mono" aria-hidden="true" data-show="false"></div>
     </div>
   `,
   styles: `
@@ -45,8 +50,33 @@ interface Cell { l: number; c: number; r: number; d: Date; g: '0' | '1'; s: numb
     .gwrap { position: relative; margin-top: 18px; overflow-x: auto; }
     .gh { display: block; width: 100%; min-width: 760px; height: 180px; cursor: crosshair; touch-action: pan-y; }
     .ghtip {
-      position: absolute; left: 0; top: 0; pointer-events: none; opacity: 0; transition: opacity .15s;
+      position: absolute; left: 0; top: 0; pointer-events: none; opacity: 0;
+      translate: var(--tt-x, 0px) var(--tt-y, 0px); scale: var(--scale-small); transform-origin: 0 100%;
       font-size: 11px; background: var(--black); color: var(--cream); padding: 6px 9px; border-radius: 8px; white-space: nowrap;
+      transition:
+        opacity var(--tt-out-dur) var(--ease-out), scale var(--tt-out-dur) var(--ease-out),
+        translate var(--tt-move-dur) var(--ease-smooth-out);
+    }
+    .ghtip[data-show='true'] {
+      opacity: 1; scale: 1;
+      transition:
+        opacity var(--tt-in-dur) var(--ease-out) var(--tt-delay), scale var(--tt-in-dur) var(--ease-out) var(--tt-delay),
+        translate var(--tt-move-dur) var(--ease-smooth-out);
+    }
+    .mx {
+      position: absolute; left: 50%; top: 50%; translate: -50% -50%; display: grid;
+      grid-template-columns: repeat(4, 4px); grid-auto-rows: 4px; gap: 4px;
+      animation: mx-in var(--duration-fast) var(--ease-out) 200ms both;
+    }
+    .mx i {
+      display: block; border-radius: 1px; background: rgba(0, 0, 0, .12);
+      animation: mx var(--matrix-cycle) var(--ease-in-out) infinite; animation-delay: calc(var(--d) * var(--matrix-cycle) / 10);
+    }
+    @keyframes mx { 0%, 45%, 100% { background-color: rgba(0, 0, 0, .12); } 15% { background-color: var(--red); } }
+    @keyframes mx-in { from { opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) {
+      .ghtip { transition: opacity var(--tt-in-dur) var(--ease-out); }
+      .mx i { animation: none; }
     }
     @media (max-width: 760px) {
       :host { margin-top: 48px; }
@@ -57,6 +87,8 @@ interface Cell { l: number; c: number; r: number; d: Date; g: '0' | '1'; s: numb
 export class GithubGridComponent {
   readonly t = inject(I18n).t;
   readonly total = GH_TOTAL;
+  readonly dots = DOTS;
+  readonly ready = signal(false);
   private cv = viewChild.required<ElementRef<HTMLCanvasElement>>('cv');
   private tip = viewChild.required<ElementRef<HTMLElement>>('tip');
   private motion = inject(MotionService);
@@ -169,7 +201,12 @@ export class GithubGridComponent {
 
     size();
     draw(performance.now());
-    const ro = new ResizeObserver(() => { size(); kick(); });
+    this.ready.set(true);
+    let rsz = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(rsz);
+      rsz = requestAnimationFrame(() => { size(); kick(); });
+    });
     ro.observe(cv);
     const stopIO = this.motion.observe(
       cv,
@@ -187,12 +224,19 @@ export class GithubGridComponent {
       const c = Math.floor(mx / step), r = Math.floor((my - TOP) / step), q = cells[(c + off) * 7 + r];
       if (q && c >= 0 && r >= 0 && r < 7) {
         tip.textContent = q.d.getUTCDate() + ' ' + MON[q.d.getUTCMonth()] + ' ' + q.d.getUTCFullYear() + ' · ' + LBL[q.l];
-        tip.style.opacity = '1';
-        const x = Math.min(mx + 12, b.width - 170);
-        tip.style.transform = 'translate(' + Math.max(0, x) + 'px,' + (my - 34) + 'px)';
+        const x = Math.max(0, Math.min(mx + 12, b.width - 170)), y = my - 34;
+        const showing = tip.dataset['show'] === 'true';
+        if (!showing) tip.style.transition = 'none';
+        tip.style.setProperty('--tt-x', x + 'px');
+        tip.style.setProperty('--tt-y', y + 'px');
+        if (!showing) {
+          void tip.offsetWidth;
+          tip.style.transition = '';
+        }
+        tip.dataset['show'] = 'true';
         return true;
       }
-      tip.style.opacity = '0';
+      tip.dataset['show'] = 'false';
       return false;
     };
     const move = (e: PointerEvent) => {
@@ -202,14 +246,14 @@ export class GithubGridComponent {
     };
     const leave = (e: PointerEvent) => {
       if (e.pointerType === 'touch') return;
-      mx = my = -999; tip.style.opacity = '0'; kick();
+      mx = my = -999; tip.dataset['show'] = 'false'; kick();
     };
     let tipTimer: ReturnType<typeof setTimeout> | undefined;
     const click = (e: MouseEvent) => {
       if (this.motion.coarse) {
         clearTimeout(tipTimer);
         if (showTip(e)) kick();
-        tipTimer = setTimeout(() => { mx = my = -999; tip.style.opacity = '0'; kick(); }, 2000);
+        tipTimer = setTimeout(() => { mx = my = -999; tip.dataset['show'] = 'false'; kick(); }, 2000);
         return;
       }
       start = performance.now(); cells.forEach((q) => (q.s = 1.6)); kick();
@@ -218,7 +262,7 @@ export class GithubGridComponent {
     cv.addEventListener('pointerleave', leave);
     cv.addEventListener('click', click);
     this.destroyRef.onDestroy(() => {
-      ro.disconnect(); stopIO(); running?.(); clearTimeout(tipTimer);
+      ro.disconnect(); cancelAnimationFrame(rsz); stopIO(); running?.(); clearTimeout(tipTimer);
       cv.removeEventListener('pointermove', move);
       cv.removeEventListener('pointerleave', leave);
       cv.removeEventListener('click', click);

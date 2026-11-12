@@ -9,13 +9,15 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
 import { ContractDemoComponent } from './contract-demo.component';
 import { StackPilhaComponent } from './stack-pilha.component';
 import { GithubGridComponent } from './github-grid.component';
+import { TiltDirective } from '../core/tilt.directive';
+import { ArrowLabelComponent } from '../core/arrow-label.component';
 
 @Component({
   selector: 'app-mycarshub',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     RevealDirective, RiseComponent, DriftDirective, MagneticDirective, ChapterDirective, BinaryShapeComponent,
-    ContractDemoComponent, StackPilhaComponent, GithubGridComponent,
+    ContractDemoComponent, StackPilhaComponent, GithubGridComponent, TiltDirective, ArrowLabelComponent,
   ],
   template: `
     <section id="mycarshub" [chapter]="t().mycarshub.chapter" [say]="t().mycarshub.say" class="sec" aria-labelledby="mch-t">
@@ -24,14 +26,14 @@ import { GithubGridComponent } from './github-grid.component';
         <p class="lead">{{ t().mycarshub.lead }}</p>
       </div>
 
-      <p reveal class="story">{{ t().mycarshub.story.a }}<span class="muted">{{ t().mycarshub.story.b }}</span>{{ t().mycarshub.story.c }}<span class="red">{{ t().mycarshub.story.d }}</span></p>
+      <p reveal class="story">{{ t().mycarshub.story.a }}<span class="muted">{{ t().mycarshub.story.b }}</span>{{ t().mycarshub.story.c }}<span class="red shine">{{ t().mycarshub.story.d }}</span></p>
 
       <div class="car"><app-binary shape="carro" [w]="460" [h]="200" ink="#000000" /></div>
 
       <app-contract-demo />
 
-      <div class="dash">
-        <div reveal="clip" class="win">
+      <div class="dash" [tilt]="7">
+        <div reveal="clip" class="win tilt-card">
           <div class="bar">
             <span class="d" style="background: #ff5f57"></span><span class="d" style="background: #febc2e"></span><span class="d" style="background: #28c840"></span>
             <span class="url mono">{{ t().mycarshub.dashLabel }}</span>
@@ -65,8 +67,8 @@ import { GithubGridComponent } from './github-grid.component';
       <app-github-grid />
 
       <div class="ctas">
-        <a magnetic class="btn btn-dark btn-lg" [href]="t().mycarshub.ctaProduct.href">{{ t().mycarshub.ctaProduct.label }}</a>
-        <a magnetic class="btn btn-line btn-lg" [href]="t().mycarshub.ctaSeries.href">{{ t().mycarshub.ctaSeries.label }}</a>
+        <a magnetic class="btn btn-dark btn-lg" [href]="t().mycarshub.ctaProduct.href" [arrowLabel]="t().mycarshub.ctaProduct.label"></a>
+        <a magnetic class="btn btn-line btn-lg" [href]="t().mycarshub.ctaSeries.href" [arrowLabel]="t().mycarshub.ctaSeries.label"></a>
       </div>
       <p reveal class="next">{{ t().mycarshub.next }} <span class="bob" aria-hidden="true">↓</span></p>
     </section>
@@ -74,16 +76,35 @@ import { GithubGridComponent } from './github-grid.component';
   styles: `
     :host { display: block; }
     .sec { max-width: var(--container); margin: 0 auto; padding: 120px var(--pad-x) 40px; }
-    .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 30px; flex-wrap: wrap; margin-top: 18px; }
+    .head {
+      display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gutter); row-gap: 18px;
+      align-items: end; margin-top: 18px;
+    }
+    .head .title { grid-column: 1 / span 8; }
+    .head .lead { grid-column: 9 / -1; }
+    @media (max-width: 1024px) {
+      .head { grid-template-columns: minmax(0, 1fr); }
+      .head .title, .head .lead { grid-column: 1; }
+    }
     .title { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(72px, 11vw, 168px); line-height: .85; letter-spacing: -.04em; }
     .lead { margin: 0 0 14px; max-width: 360px; font-size: 18px; line-height: 1.5; color: var(--body-2); }
     .story { margin: 50px 0 0; max-width: 900px; font-size: clamp(24px, 2.6vw, 34px); line-height: 1.35; letter-spacing: -.015em; font-weight: 500; }
     .muted { color: var(--muted); }
-    .red { color: var(--red); }
+    .red { color: var(--red); --shimmer-highlight: #ffb39f; }
+    @supports (animation-timeline: view()) {
+      .red { animation-timeline: view(); animation-range: entry 100% cover 70%; animation-duration: auto; }
+    }
     .car { display: flex; flex-direction: column; align-items: center; margin-top: 70px; gap: 8px; }
 
     .dash { margin-top: 36px; border-radius: var(--radius-card-lg); background: var(--red); position: relative; padding: 64px 56px 0; overflow: clip; }
-    .win { max-width: 920px; margin: 0 auto; border-radius: 14px 14px 0 0; overflow: hidden; box-shadow: 0 50px 90px -30px rgba(0, 0, 0, .65); background: #141414; }
+    .win { position: relative; max-width: 920px; margin: 0 auto; border-radius: 14px 14px 0 0; overflow: hidden; box-shadow: 0 50px 90px -30px rgba(0, 0, 0, .65); background: #141414; }
+    @media (hover: hover) and (pointer: fine) {
+      .win {
+        transform: perspective(var(--tilt-perspective)) rotateX(var(--tilt-rx, 0deg)) rotateY(var(--tilt-ry, 0deg));
+        transform-origin: 50% 100%; transition: transform var(--tilt-return) var(--ease-smooth-out);
+      }
+      .win.is-tilting { transition-duration: var(--tilt-follow); }
+    }
     .bar { height: 34px; display: flex; align-items: center; gap: 7px; padding: 0 14px; background: #1f1f1f; }
     .d { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
     .url { margin-left: 14px; font-size: 11px; color: #8a8a8a; }

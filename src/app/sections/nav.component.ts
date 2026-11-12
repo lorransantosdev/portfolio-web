@@ -4,17 +4,20 @@ import {
 import { I18n } from '../core/i18n';
 import { ChapterService } from '../core/chapter';
 import { MotionService } from '../core/motion.service';
+import { SwapComponent } from '../core/swap.component';
+import { ArrowLabelComponent } from '../core/arrow-label.component';
 
 @Component({
   selector: 'app-nav',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [SwapComponent, ArrowLabelComponent],
   template: `
     <nav class="nav" [attr.aria-label]="t().lang === 'pt' ? 'Principal' : 'Main'">
       <div class="navin">
         <a #logo class="logo" [href]="base() + '#topo'" [attr.aria-label]="t().nav.homeAria">
           <img class="mark" src="logo.svg" width="28" height="28" alt="" />
           <span class="word">lorran<span class="deg" aria-hidden="true">°</span></span>
-          <span class="ch" aria-live="off">{{ chapter() ? '/ ' + chapter() : '' }}</span>
+          <span class="ch" aria-live="off" [swap]="chapter() ? '/ ' + chapter() : ''"></span>
         </a>
         <div class="navl">
           @for (l of t().nav.links; track l.href) {
@@ -24,7 +27,7 @@ import { MotionService } from '../core/motion.service';
         <div class="actions">
           <a class="lang tap" [href]="t().nav.switchHref" [attr.title]="t().nav.switchTitle"
              [attr.hreflang]="t().lang === 'pt' ? 'en' : 'pt-BR'" [attr.lang]="t().lang === 'pt' ? 'en' : 'pt-BR'">{{ t().nav.switchLabel }}</a>
-          <a class="cv tap" [href]="t().nav.resumeHref" target="_blank" rel="noopener">{{ t().nav.resume }}</a>
+          <a class="cv tap" [href]="t().nav.resumeHref" target="_blank" rel="noopener" [arrowLabel]="t().nav.resume"></a>
         </div>
       </div>
       <div #prog class="prog" aria-hidden="true"></div>
@@ -48,7 +51,7 @@ import { MotionService } from '../core/motion.service';
     }
     .mark {
       width: 28px; height: 28px; flex: 0 0 auto; margin-right: -4px;
-      animation: mark-in .9s var(--ease) .1s both;
+      animation: mark-in var(--duration-entrance) var(--ease-smooth-out) .1s both;
     }
     @keyframes mark-in { from { opacity: 0; rotate: -200deg; scale: .4; } to { opacity: 1; rotate: 0deg; scale: 1; } }
     @media (prefers-reduced-motion: reduce) {

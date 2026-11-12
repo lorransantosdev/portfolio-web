@@ -6,12 +6,14 @@ import { MotionService } from '../core/motion.service';
 import { RevealDirective } from '../core/reveal.directive';
 import { RiseComponent } from '../core/rise.component';
 import { ChapterDirective } from '../core/chapter';
+import { DecryptComponent } from '../core/decrypt.component';
+import { ArrowLabelComponent } from '../core/arrow-label.component';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
 
 @Component({
   selector: 'app-cielo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, RiseComponent, ChapterDirective, BinaryShapeComponent],
+  imports: [RevealDirective, RiseComponent, ChapterDirective, DecryptComponent, ArrowLabelComponent, BinaryShapeComponent],
   template: `
     <section #sec id="cielo" [chapter]="t().cielo.chapter" [say]="t().cielo.say" class="dark" aria-labelledby="cielo-t">
       <div class="wrap inner">
@@ -31,8 +33,8 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
                 <span class="rd mono">{{ t().cielo.rolePrev.dates }}</span>
               </div>
             </div>
-            <a class="ul li tap" [href]="t().cielo.linkedin.href">{{ t().cielo.linkedin.label }}</a>
-            <div class="dolabel mono">{{ t().cielo.doLabel }}</div>
+            <a class="ul li tap" [href]="t().cielo.linkedin.href" [arrowLabel]="t().cielo.linkedin.label"></a>
+            <div class="dolabel mono" [decrypt]="t().cielo.doLabel"></div>
             <div class="does">
               @for (d of t().cielo.does; track $index) {
                 <div reveal class="do">{{ d }}</div>
@@ -50,7 +52,7 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
         <div class="block">
           <div class="bh">
             <h3 class="bt">{{ t().cielo.flowTitle }}</h3>
-            <div class="bn mono">{{ t().cielo.flowNote }}</div>
+            <div class="bn mono" [decrypt]="t().cielo.flowNote"></div>
           </div>
           <div #flow class="flow">
             <div #line class="line" aria-hidden="true"></div>
@@ -87,7 +89,7 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
     .dark { background: var(--black); color: var(--cream); margin-top: 60px; }
     @media (hover: hover) and (pointer: fine) { .dark a:hover { color: var(--red); } }
     .inner { padding-top: 110px; padding-bottom: 110px; }
-    .grid { --min: 320px; --gap: 56px; margin-top: 28px; align-items: start; }
+    .grid { --min: 320px; margin-top: 28px; align-items: start; }
     .title { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(64px, 8vw, 120px); line-height: .88; letter-spacing: -.03em; }
     .lead { font-size: 20px; line-height: 1.5; margin: 18px 0 0; max-width: 460px; opacity: .85; }
     .roles { margin-top: 34px; display: flex; flex-direction: column; }
@@ -107,9 +109,9 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
     .does { display: flex; flex-direction: column; margin-top: 6px; }
     .do { padding: 12px 0; border-bottom: 1px solid rgba(249, 242, 234, .14); font-size: 16px; line-height: 1.5; }
     .ph { color: var(--placeholder); }
-    .cardcol { display: flex; flex-direction: column; align-items: center; gap: 18px; padding-top: 40px; }
+    .cardcol { display: flex; flex-direction: column; align-items: flex-end; gap: 18px; padding-top: 40px; }
     .card { transform-style: preserve-3d; will-change: transform; width: 100%; max-width: 440px; }
-    .cap { font-size: 11px; opacity: .55; }
+    .cap { font-size: 11px; opacity: .55; width: 100%; max-width: 440px; text-align: center; }
     .block { margin-top: 90px; }
     .bh { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 12px; }
     .bt { margin: 0; font-size: 22px; font-weight: 500; }
@@ -121,8 +123,8 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
       background: var(--red); box-shadow: 0 0 0 6px rgba(217, 29, 4, .25);
     }
     .flowg { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; position: relative; list-style: none; margin: 0; padding: 0; }
-    .fnode { transition: opacity .45s var(--ease); }
-    .circ { transition: background .3s, border-color .3s, scale .45s var(--ease); }
+    .fnode { transition: opacity var(--duration-slow) var(--ease-smooth-out); }
+    .circ { transition: background var(--duration-fast), border-color var(--duration-fast), scale var(--duration-slow) var(--ease-bounce); }
     .fnode.lit .circ { scale: 1.08; }
     .fnode.lit .circ { border-color: var(--red); }
     .circ {
@@ -156,6 +158,7 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
       .ft { margin-top: 0; }
       .fd { min-height: 0; }
       .q4 { grid-template-columns: minmax(0, 1fr); gap: 6px; padding: 16px 0; }
+      .cardcol { align-items: center; }
       .block { margin-top: 56px; }
     }
   `,

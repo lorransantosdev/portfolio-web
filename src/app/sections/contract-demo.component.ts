@@ -3,12 +3,13 @@ import {
 } from '@angular/core';
 import { I18n } from '../core/i18n';
 import { MotionService } from '../core/motion.service';
+import { SwapComponent } from '../core/swap.component';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
 
 @Component({
   selector: 'app-contract-demo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BinaryShapeComponent],
+  imports: [SwapComponent, BinaryShapeComponent],
   template: `
     <div #root class="ai">
       <div>
@@ -26,7 +27,7 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
       <div class="doc">
         <div class="dh">
           <span class="dt">{{ t().mycarshub.contractTitle }}</span>
-          <span class="badge mono" [class]="'s' + step()">{{ t().mycarshub.badges[step()] }}</span>
+          <span class="badge mono" [class]="'s' + step()"><span [swap]="t().mycarshub.badges[step()]"></span></span>
         </div>
         <div class="hr"></div>
         @for (l of t().mycarshub.lines; track $index) {
@@ -52,7 +53,7 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
       border-top: 1px solid var(--line-dark); padding: 16px 0; color: var(--cream); font: inherit;
       cursor: pointer; text-align: left;
     }
-    .sb { opacity: .62; transition: opacity .3s; }
+    .sb { opacity: .62; transition: opacity var(--duration-fast) var(--ease-smooth-out); }
     .step.on .sb { opacity: 1; }
     @media (hover: hover) and (pointer: fine) { .step:hover .sb { opacity: 1; } }
     .sn { font-size: 12px; color: var(--red-on-dark); width: 26px; flex: 0 0 auto; }
@@ -65,7 +66,7 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
     }
     .dh { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
     .dt { font-weight: 700; font-size: 14px; letter-spacing: .02em; }
-    .badge { font-size: 11px; padding: 5px 10px; border-radius: var(--radius-pill); white-space: nowrap; transition: background .3s, color .3s; }
+    .badge { font-size: 11px; padding: 5px 10px; border-radius: var(--radius-pill); white-space: nowrap; transition: background var(--duration-fast), color var(--duration-fast); }
     .badge.s0 { background: rgba(0, 0, 0, .07); color: var(--black); }
     .badge.s1 { background: var(--black); color: var(--cream); }
     .badge.s2 { background: var(--red); color: var(--cream); }

@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, afterNextRender, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { I18n } from '../core/i18n';
 import { SeoService } from '../core/seo.service';
+import { SparkService } from '../core/spark';
 import { Lang } from '../content/types';
 import { NavComponent } from '../sections/nav.component';
 import { HeroComponent } from '../sections/hero.component';
@@ -52,5 +53,8 @@ export default class HomePage {
     const lang = (inject(ActivatedRoute).snapshot.data['lang'] as Lang) ?? 'pt';
     this.i18n.lang.set(lang);
     inject(SeoService).apply(this.i18n.t());
+    const spark = inject(SparkService);
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => destroyRef.onDestroy(spark.start()));
   }
 }
