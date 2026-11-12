@@ -16,7 +16,9 @@ export class RevealDirective {
       const sibs = el.parentElement
         ? Array.from(el.parentElement.children).filter((x) => x.hasAttribute('reveal'))
         : [el];
-      const delay = Math.min(Math.max(0, sibs.indexOf(el)), 4) * 60;
+      const touch = this.motion.coarse;
+      const delay = Math.min(Math.max(0, sibs.indexOf(el)), touch ? 5 : 4) * (touch ? 80 : 60);
+      const dur = touch ? .7 : .6;
       let hidden = false;
       const stop = this.motion.observe(
         el,
@@ -24,18 +26,21 @@ export class RevealDirective {
           if (e.isIntersecting) {
             stop();
             if (!hidden) return;
-            el.style.transition = `opacity .6s ${EASE} ${delay}ms, translate .6s ${EASE} ${delay}ms`;
+            el.style.transition = ['opacity', 'translate', 'scale'].map((p) => `${p} ${dur}s ${EASE} ${delay}ms`).join(', ');
             el.style.opacity = '1';
             el.style.translate = '0 0';
+            if (touch) el.style.scale = '1';
             setTimeout(() => {
               el.style.removeProperty('transition');
               el.style.removeProperty('opacity');
               el.style.removeProperty('translate');
-            }, 650 + delay);
+              el.style.removeProperty('scale');
+            }, dur * 1000 + 50 + delay);
           } else if (!hidden && e.boundingClientRect.top > window.innerHeight) {
             hidden = true;
             el.style.opacity = '0';
-            el.style.translate = '0 16px';
+            el.style.translate = touch ? '0 24px' : '0 16px';
+            if (touch) el.style.scale = '.98';
           }
         },
         { rootMargin: '0px 0px 12% 0px' },

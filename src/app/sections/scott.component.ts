@@ -70,7 +70,7 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
             <div class="field">
               <input id="sq" name="q" [value]="input()" (input)="input.set($any($event.target).value)"
                 [placeholder]="t().scott.placeholder" autocomplete="off" />
-              <button type="submit" class="send">{{ t().scott.send }}</button>
+              <button type="submit" class="send press">{{ t().scott.send }}</button>
             </div>
             <div class="note mono">{{ t().scott.formNote }}</div>
           </form>
@@ -158,6 +158,7 @@ export class ScottComponent {
   private sec = viewChild.required<ElementRef<HTMLElement>>('sec');
   private img = viewChild.required<ElementRef<HTMLImageElement>>('img');
   private lean = 0;
+  private wagUntil = 0;
   private pets: number[] = [];
   private hk = 0;
   private timers: Record<string, ReturnType<typeof setTimeout>> = {};
@@ -214,10 +215,20 @@ export class ScottComponent {
     }
   }
 
+  private greet(): void {
+    if (this.pose() !== 'idle') return;
+    this.pose.set('wave');
+    this.say(this.t().scott.hoverSay, 1600);
+    this.later('pose', 1100, () => this.bounce(800));
+  }
+
   toggle(i: number): void {
     const o = this.open() === i ? -1 : i;
     this.open.set(o);
-    if (o >= 0) this.bounce(900);
+    if (o >= 0) {
+      this.bounce(900);
+      this.wagUntil = performance.now() + 1100;
+    }
   }
 
   submit(e: Event): void {
@@ -250,7 +261,7 @@ export class ScottComponent {
       const tick = (now: number) => {
         if (this.zoom()) return;
         const t = now / 1000;
-        const wag = Math.floor(t) % 7 === 0 ? Math.sin(t * 18) * 3 : 0;
+        const wag = now < this.wagUntil ? Math.sin(t * 22) * 5 : Math.floor(t) % 7 === 0 ? Math.sin(t * 18) * 3 : 0;
         img.style.rotate = (this.lean * 7 + wag).toFixed(2) + 'deg';
         const b = Math.sin(t * 2.4) * .012;
         img.style.scale = (1 + b).toFixed(4) + ' ' + (1 - b).toFixed(4);
@@ -260,8 +271,19 @@ export class ScottComponent {
         if (e.isIntersecting) { if (!stopTick) stopTick = this.motion.add(tick); }
         else if (stopTick) { stopTick(); stopTick = null; }
       });
+      const stopGreet = this.motion.coarse
+        ? this.motion.observe(
+            img,
+            (e) => {
+              if (!e.isIntersecting) return;
+              stopGreet();
+              this.greet();
+            },
+            { threshold: .6 },
+          )
+        : () => {};
       destroyRef.onDestroy(() => {
-        stopIO(); stopTick?.();
+        stopIO(); stopTick?.(); stopGreet();
         sec.removeEventListener('pointermove', move);
         sec.removeEventListener('pointerleave', leave);
       });

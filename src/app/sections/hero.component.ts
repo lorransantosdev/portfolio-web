@@ -33,7 +33,7 @@ import { BinaryPortraitComponent } from '../binary/binary-portrait.component';
               <div class="v">{{ f.v }}</div>
             </div>
           }
-          <div class="hint mono">{{ t().hero.hint }}</div>
+          <div class="hint mono"><span class="h-ptr">{{ t().hero.hint }}</span><span class="h-touch">{{ t().hero.hintTouch }}</span></div>
         </div>
       </div>
       <div #name class="bigname" aria-hidden="true">
@@ -68,6 +68,11 @@ import { BinaryPortraitComponent } from '../binary/binary-portrait.component';
     .k { font-size: 11px; color: var(--muted); }
     .v { font-weight: 600; margin-top: 2px; }
     .hint { font-size: 11px; color: var(--muted); margin-top: 14px; }
+    .h-touch { display: none; }
+    @media (hover: none) {
+      .h-ptr { display: none; }
+      .h-touch { display: inline; }
+    }
     .bigname {
       position: relative; z-index: 1; margin-top: -0.42em; text-align: center;
       font-family: var(--font-display); font-size: clamp(140px, 19vw, 300px); line-height: .78;

@@ -11,10 +11,17 @@ export class MotionService {
   readonly coarse: boolean =
     this.isBrowser && !!window.matchMedia && window.matchMedia('(hover: none)').matches;
 
+  constructor() {
+    // o iOS só aplica :active se a página tiver algum listener de touch
+    if (this.coarse) document.addEventListener('touchstart', () => {}, { passive: true });
+  }
+
   private tickers = new Set<Ticker>();
   private raf = 0;
   private last = 0;
 
+  scrollDelta = 0;
+  private lastScrollY = 0;
   private scrollSubs = new Set<() => void>();
   private scrollPending = false;
   private scrollBound = false;
@@ -37,6 +44,9 @@ export class MotionService {
     this.last = now;
     if (this.scrollPending) {
       this.scrollPending = false;
+      const y = window.scrollY || 0;
+      this.scrollDelta = y - this.lastScrollY;
+      this.lastScrollY = y;
       this.scrollSubs.forEach((fn) => fn());
     }
     for (const fn of Array.from(this.tickers)) {
@@ -57,6 +67,7 @@ export class MotionService {
     this.scrollSubs.add(fn);
     if (!this.scrollBound) {
       this.scrollBound = true;
+      this.lastScrollY = window.scrollY || 0;
       const kick = () => {
         this.scrollPending = true;
         this.start();

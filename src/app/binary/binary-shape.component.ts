@@ -90,7 +90,15 @@ export class BinaryShapeComponent {
     }
 
     let kick = 0, last = 0, started = false, dirty = true, stopTick: (() => void) | null = null;
+    let glideAt = 0;
+    const finger = (now: number) => {
+      const p = (now - glideAt) / 1700;
+      if (p >= 1) { glideAt = 0; m.in = false; kick = now + 1400; return; }
+      const e = p < .5 ? 2 * p * p : 1 - 2 * (1 - p) * (1 - p);
+      m.x = W * (1.2 * e - .1); m.y = H * (.5 + Math.sin(p * 6.283) * .28); m.in = true;
+    };
     const tick = (now: number, sub: number) => {
+      if (glideAt && now >= glideAt) finger(now);
       if (m.in || now < kick) {
         draw(now, sub, true);
         dirty = true;
@@ -118,7 +126,10 @@ export class BinaryShapeComponent {
       cv,
       (e) => {
         if (e.isIntersecting) {
-          if (!started) { started = true; kick = performance.now() + 2600; }
+          if (!started) {
+            started = true; kick = performance.now() + 2600;
+            if (this.motion.coarse) glideAt = performance.now() + 1900;
+          }
           if (!stopTick) stopTick = this.motion.add(tick);
         } else if (stopTick) {
           stopTick(); stopTick = null;
@@ -136,11 +147,20 @@ export class BinaryShapeComponent {
       kick = performance.now() + 2200;
       cells.forEach((c) => { const a = Math.random() * 6.283, sp = 6 + Math.random() * 16; c.vx += Math.cos(a) * sp; c.vy += Math.sin(a) * sp; });
     };
+    const nudge = () => {
+      const d = this.motion.scrollDelta;
+      if (!stopTick || Math.abs(d) < 3) return;
+      const f = Math.max(-40, Math.min(40, d)) * .08;
+      for (const q of cells) q.vy += f * (.5 + Math.random());
+      kick = Math.max(kick, performance.now() + 900);
+    };
+    const stopScroll = this.motion.coarse ? this.motion.onScroll(nudge) : () => {};
     cv.addEventListener('pointermove', move);
     cv.addEventListener('pointerleave', leave);
     cv.addEventListener('click', click);
     this.destroyRef.onDestroy(() => {
       stopIO();
+      stopScroll();
       stopTick?.();
       cv.removeEventListener('pointermove', move);
       cv.removeEventListener('pointerleave', leave);

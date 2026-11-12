@@ -97,6 +97,8 @@ export class GithubGridComponent {
 
     let W = 0, H = 0, step = 0, dpr = 1, off = 0, COLS = ALLC;
     let mx = -999, my = -999, start = 0, seen = reduce;
+    const scanning = !reduce && this.motion.coarse;
+    let visible = false, scanX = -999;
     const labels = document.createElement('canvas');
 
     const size = () => {
@@ -129,6 +131,10 @@ export class GithubGridComponent {
       const el = (now - start) / 1000;
       let busy = false;
       const fs = Math.max(9, step * .78);
+      const lead = (ALLC - 1) * .018 + .6;
+      scanX = scanning && visible && el > lead
+        ? -step * 3 + (W + step * 6) * ((((el - lead) / 9) % 1) / .8)
+        : -999;
       for (const q of cells) {
         if (q.c < off) continue;
         const x = (q.c - off) * step + step / 2, y = TOP + q.r * step + step / 2;
@@ -137,7 +143,7 @@ export class GithubGridComponent {
         let ch = q.g;
         if (!reduce) {
           const dx = x - mx, dy = y - my, dd = Math.sqrt(dx * dx + dy * dy);
-          const near = Math.max(0, 1 - dd / (step * 3.2));
+          const near = Math.max(0, 1 - dd / (step * 3.2), .8 - Math.abs(x - scanX) / (step * 2.4));
           const target = 1 + near * .9;
           q.s += (target - q.s) * .25;
           if (Math.abs(target - q.s) > .01) busy = true;
@@ -150,7 +156,7 @@ export class GithubGridComponent {
         g.drawImage(GLY[q.l][ch], x - sz / 2, y - sz / 2, sz, sz);
       }
       g.globalAlpha = 1;
-      return busy || mx > -999;
+      return busy || mx > -999 || (scanning && visible);
     };
 
     let running: (() => void) | null = null;
@@ -172,29 +178,53 @@ export class GithubGridComponent {
       ? () => {}
       : this.motion.observe(
           cv,
-          (e) => { if (e.isIntersecting && !seen) { seen = true; start = performance.now(); kick(); } },
+          (e) => {
+            visible = e.isIntersecting;
+            if (visible && !seen) { seen = true; start = performance.now(); }
+            if (visible) kick();
+          },
           { threshold: .3 },
         );
 
-    const move = (e: PointerEvent) => {
+    const showTip = (e: MouseEvent): boolean => {
       const b = cv.getBoundingClientRect();
       mx = e.clientX - b.left; my = e.clientY - b.top;
-      kick();
       const c = Math.floor(mx / step), r = Math.floor((my - TOP) / step), q = cells[(c + off) * 7 + r];
-      if (q && r >= 0 && r < 7) {
+      if (q && c >= 0 && r >= 0 && r < 7) {
         tip.textContent = q.d.getUTCDate() + ' ' + MON[q.d.getUTCMonth()] + ' ' + q.d.getUTCFullYear() + ' · ' + LBL[q.l];
         tip.style.opacity = '1';
         const x = Math.min(mx + 12, b.width - 170);
         tip.style.transform = 'translate(' + Math.max(0, x) + 'px,' + (my - 34) + 'px)';
-      } else tip.style.opacity = '0';
+        return true;
+      }
+      tip.style.opacity = '0';
+      return false;
     };
-    const leave = () => { mx = my = -999; tip.style.opacity = '0'; kick(); };
-    const click = () => { if (reduce) return; start = performance.now(); cells.forEach((q) => (q.s = 1.6)); kick(); };
+    const move = (e: PointerEvent) => {
+      if (e.pointerType === 'touch') return;
+      showTip(e);
+      kick();
+    };
+    const leave = (e: PointerEvent) => {
+      if (e.pointerType === 'touch') return;
+      mx = my = -999; tip.style.opacity = '0'; kick();
+    };
+    let tipTimer: ReturnType<typeof setTimeout> | undefined;
+    const click = (e: MouseEvent) => {
+      if (this.motion.coarse) {
+        clearTimeout(tipTimer);
+        if (showTip(e)) kick();
+        tipTimer = setTimeout(() => { mx = my = -999; tip.style.opacity = '0'; kick(); }, 2000);
+        return;
+      }
+      if (reduce) return;
+      start = performance.now(); cells.forEach((q) => (q.s = 1.6)); kick();
+    };
     cv.addEventListener('pointermove', move);
     cv.addEventListener('pointerleave', leave);
     cv.addEventListener('click', click);
     this.destroyRef.onDestroy(() => {
-      ro.disconnect(); stopIO(); running?.();
+      ro.disconnect(); stopIO(); running?.(); clearTimeout(tipTimer);
       cv.removeEventListener('pointermove', move);
       cv.removeEventListener('pointerleave', leave);
       cv.removeEventListener('click', click);

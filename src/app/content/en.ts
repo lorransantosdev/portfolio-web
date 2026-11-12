@@ -46,6 +46,7 @@ export const EN: Content = {
       { k: 'at FIAP', v: '3× champion' },
     ],
     hint: '↖ hover over my face',
+    hintTouch: '↖ tap my face',
   },
   intro: {
     chapter: 'hi',
@@ -174,6 +175,7 @@ export const EN: Content = {
     ],
     stackTitle: 'My stack. Literally.',
     stackHint: 'hover a layer: it turns into 0s and 1s and back.',
+    stackHintTouch: 'scroll slowly: the middle layer turns into 0s and 1s and back.',
     stackTop: '↓ push · top of the stack',
     stackBottom: 'bottom',
     layers: [

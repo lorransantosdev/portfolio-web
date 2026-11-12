@@ -46,6 +46,7 @@ export const PT: Content = {
       { k: 'na FIAP', v: '3× campeão' },
     ],
     hint: '↖ passa o mouse no meu rosto',
+    hintTouch: '↖ toca no meu rosto',
   },
   intro: {
     chapter: 'oi',
@@ -176,6 +177,7 @@ export const PT: Content = {
     ],
     stackTitle: 'Minha stack. Literalmente uma pilha.',
     stackHint: 'passa o mouse numa camada: ela vira 0 e 1 e volta.',
+    stackHintTouch: 'rola devagar: a camada do meio vira 0 e 1 e volta.',
     stackTop: '↓ push · topo da pilha',
     stackBottom: 'base',
     layers: [

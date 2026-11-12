@@ -128,6 +128,13 @@ button { font: inherit; }
   .tap { min-height: 44px; display: inline-flex; align-items: center; }
 }
 
+@media (hover: none) {
+  .btn, .tap, .press { transition: scale .18s var(--ease); -webkit-tap-highlight-color: transparent; }
+  .lift { transition: translate .35s var(--ease), box-shadow .35s, scale .18s var(--ease); }
+  .crow { transition: padding .25s, color .25s, scale .18s var(--ease); }
+  .btn:active, .tap:active, .press:active, .lift:active, .crow:active { scale: .97; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .bob, .heart, .zoom { animation: none; }

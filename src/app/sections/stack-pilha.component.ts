@@ -10,7 +10,9 @@ import { MotionService } from '../core/motion.service';
   template: `
     <div class="head">
       <h3 class="title">{{ t().mycarshub.stackTitle }}</h3>
-      <div class="hint mono">{{ t().mycarshub.stackHint }}</div>
+      <div class="hint mono">
+        <span class="h-ptr">{{ t().mycarshub.stackHint }}</span><span class="h-touch">{{ t().mycarshub.stackHintTouch }}</span>
+      </div>
     </div>
     <div #stack class="stack">
       <div class="top mono" aria-hidden="true">{{ t().mycarshub.stackTop }}</div>
@@ -45,9 +47,19 @@ import { MotionService } from '../core/motion.service';
       transition: background .25s, color .25s, padding .25s; cursor: default;
     }
     .layer.last { border-bottom: 1px solid rgba(0, 0, 0, .16); }
-    .layer:hover { background: var(--black); color: var(--cream); padding-left: 26px; }
-    .layer:hover .lab { color: inherit; }
-    .layer:hover .lidx { color: var(--red-on-dark); }
+    .layer.on { background: var(--black); color: var(--cream); padding-left: 26px; }
+    .layer.on .lab { color: inherit; }
+    .layer.on .lidx { color: var(--red-on-dark); }
+    .h-touch { display: none; }
+    @media (hover: hover) {
+      .layer:hover { background: var(--black); color: var(--cream); padding-left: 26px; }
+      .layer:hover .lab { color: inherit; }
+      .layer:hover .lidx { color: var(--red-on-dark); }
+    }
+    @media (hover: none) {
+      .h-ptr { display: none; }
+      .h-touch { display: inline; }
+    }
     .lidx { font-size: 13px; color: var(--muted); }
     .lab { font-size: 12px; color: var(--muted); }
     .items { font-size: clamp(22px, 2.6vw, 34px); font-weight: 500; letter-spacing: -.02em; line-height: 1.25; }
@@ -73,6 +85,7 @@ export class StackPilhaComponent {
       const wrap = this.stack().nativeElement;
       const layers = Array.from(wrap.querySelectorAll<HTMLElement>('.layer'));
       const cleanups: (() => void)[] = [];
+      const decoders: (() => void)[] = [];
 
       layers.forEach((L) => {
         const nodes = Array.from(L.querySelectorAll<HTMLElement>('.sk'))
@@ -95,9 +108,35 @@ export class StackPilhaComponent {
             return true;
           });
         };
-        L.addEventListener('pointerenter', enter);
+        decoders.push(enter);
+        if (!motion.coarse) L.addEventListener('pointerenter', enter);
         cleanups.push(() => { L.removeEventListener('pointerenter', enter); stop?.(); });
       });
+
+      if (motion.coarse) {
+        let active = -1, stopScroll: (() => void) | null = null;
+        const pick = () => {
+          const vh = window.innerHeight || 800, mid = vh / 2;
+          let best = -1, bestD = vh * .3;
+          layers.forEach((L, i) => {
+            const r = L.getBoundingClientRect(), d = Math.abs(r.top + r.height / 2 - mid);
+            if (d < bestD) { bestD = d; best = i; }
+          });
+          if (best === active) return;
+          if (active >= 0) layers[active].classList.remove('on');
+          active = best;
+          if (best >= 0) { layers[best].classList.add('on'); decoders[best](); }
+        };
+        const stopNear = motion.observe(wrap, (e) => {
+          if (e.isIntersecting) { if (!stopScroll) stopScroll = motion.onScroll(pick); }
+          else if (stopScroll) {
+            stopScroll(); stopScroll = null;
+            if (active >= 0) layers[active].classList.remove('on');
+            active = -1;
+          }
+        });
+        cleanups.push(() => { stopNear(); stopScroll?.(); });
+      }
 
       const stopIO = motion.observe(
         wrap,

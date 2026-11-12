@@ -51,8 +51,8 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
             <h3 class="bt">{{ t().cielo.flowTitle }}</h3>
             <div class="bn mono">{{ t().cielo.flowNote }}</div>
           </div>
-          <div class="flow">
-            <div class="line" aria-hidden="true"></div>
+          <div #flow class="flow">
+            <div #line class="line" aria-hidden="true"></div>
             <div #pulse class="pulse" aria-hidden="true"></div>
             <ol class="flowg">
               @for (n of t().cielo.flow; track n.i) {
@@ -121,6 +121,8 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
     }
     .flowg { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; position: relative; list-style: none; margin: 0; padding: 0; }
     .fnode { transition: opacity .3s; }
+    .circ { transition: background .3s, border-color .3s; }
+    .fnode.lit .circ { border-color: var(--red); }
     .circ {
       width: 46px; height: 46px; border-radius: 50%; background: var(--black); border: 1px solid rgba(249, 242, 234, .4);
       display: flex; align-items: center; justify-content: center; font-size: 12px;
@@ -143,7 +145,8 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
       .role { grid-template-columns: 18px minmax(0, 1fr); row-gap: 4px; }
       .role > .rd { grid-column: 2; }
       .rt { font-size: 16px; }
-      .line, .pulse { display: none; }
+      .line { left: 23px; right: auto; width: 1px; height: 0; }
+      .pulse { left: 18px; top: 0; transition: none; }
       .flowg { grid-template-columns: minmax(0, 1fr); gap: 20px; }
       .fnode { display: grid; grid-template-columns: 46px minmax(0, 1fr); column-gap: 14px; align-items: start; }
       .fnode > * { grid-column: 2; }
@@ -160,29 +163,64 @@ export class CieloComponent {
   private sec = viewChild.required<ElementRef<HTMLElement>>('sec');
   private card = viewChild.required<ElementRef<HTMLElement>>('card');
   private pulse = viewChild.required<ElementRef<HTMLElement>>('pulse');
+  private flow = viewChild.required<ElementRef<HTMLElement>>('flow');
+  private line = viewChild.required<ElementRef<HTMLElement>>('line');
   private fnodes = viewChildren<ElementRef<HTMLElement>>('fnode');
 
   constructor() {
     const motion = inject(MotionService);
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
-      if (motion.reduced) return;
       const card = this.card().nativeElement;
       const pulse = this.pulse().nativeElement;
+      const line = this.line().nativeElement;
       const nodes = this.fnodes().map((r) => r.nativeElement);
-      let fk = -1;
+      const narrow = window.matchMedia('(max-width: 760px)');
+      let fk = -1, vertical = false, ys: number[] = [];
+      const measure = () => {
+        vertical = narrow.matches;
+        ys = vertical ? nodes.map((n) => n.offsetTop + 23) : [];
+        if (vertical) {
+          line.style.top = ys[0] + 'px';
+          line.style.height = ys[ys.length - 1] - ys[0] + 'px';
+          pulse.style.left = '';
+          pulse.style.translate = '0 ' + (ys[0] - 5.5) + 'px';
+        } else {
+          line.style.removeProperty('top');
+          line.style.removeProperty('height');
+          pulse.style.removeProperty('translate');
+        }
+      };
+      measure();
+      const ro = new ResizeObserver(measure);
+      ro.observe(this.flow().nativeElement);
+      destroyRef.onDestroy(() => ro.disconnect());
+      if (motion.reduced) return;
+      const light = (k: number) => {
+        if (fk === k) return;
+        fk = k;
+        nodes.forEach((n, i) => {
+          n.style.opacity = i <= k ? '1' : '.45';
+          n.classList.toggle('lit', i === k);
+        });
+      };
       const tick = (now: number) => {
         const t = now / 1000;
         card.style.transform =
           'perspective(900px) rotateY(' + (Math.sin(t * .6) * 14).toFixed(2) + 'deg) rotateX(' + (Math.cos(t * .5) * 6).toFixed(2) + 'deg)';
         const p = (t * .22) % 1;
-        pulse.style.left = (p * 100).toFixed(2) + '%';
         pulse.style.opacity = p > .96 ? '0' : '1';
-        const k = Math.min(4, Math.floor(p * 5.2));
-        if (fk !== k) {
-          fk = k;
-          nodes.forEach((n, i) => (n.style.opacity = i <= k ? '1' : '.45'));
+        if (vertical) {
+          const top = ys[0], span = ys[ys.length - 1] - top, q = Math.min(1, p / .9);
+          const y = top + q * span;
+          pulse.style.translate = '0 ' + (y - 5.5).toFixed(1) + 'px';
+          let k = 0;
+          while (k < ys.length - 1 && y >= ys[k + 1] - 12) k++;
+          light(k);
+          return;
         }
+        pulse.style.left = (p * 100).toFixed(2) + '%';
+        light(Math.min(4, Math.floor(p * 5.2)));
       };
       let stopTick: (() => void) | null = null;
       const stopIO = motion.observe(this.sec().nativeElement, (e) => {

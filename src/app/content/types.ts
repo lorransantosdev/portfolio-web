@@ -81,6 +81,7 @@ export interface Content {
     portraitAria: string;
     facts: { k: string; v: string }[];
     hint: string;
+    hintTouch: string;
   };
   intro: { chapter: string; say: string; avatarAlt: string; words: IntroToken[] };
   origem: {
@@ -141,6 +142,7 @@ export interface Content {
     built: StackGroup[];
     stackTitle: string;
     stackHint: string;
+    stackHintTouch: string;
     stackTop: string;
     stackBottom: string;
     layers: StackLayer[];

@@ -9,7 +9,7 @@ import { ChapterService } from '../core/chapter';
   selector: 'app-mini-scott',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <a class="mini" [class.on]="on()" [href]="href()" [attr.aria-label]="t().mini.aria"
+    <a class="mini press" [class.on]="on()" [href]="href()" [attr.aria-label]="t().mini.aria"
        [attr.aria-hidden]="on() ? null : 'true'" [attr.tabindex]="on() ? null : -1">
       @if (say() && on()) { <span class="say" role="status">{{ say() }}</span> }
       <img #img src="assets/scott-wave-mini.webp" width="160" height="143" alt="" decoding="async" loading="lazy" />
@@ -18,7 +18,8 @@ import { ChapterService } from '../core/chapter';
   styles: `
     .mini {
       position: fixed; right: 22px; bottom: 18px; z-index: 30; display: flex; align-items: flex-end; gap: 8px;
-      text-decoration: none; opacity: 0; pointer-events: none; transition: opacity .4s;
+      text-decoration: none; opacity: 0; pointer-events: none; transition: opacity .4s, scale .18s var(--ease);
+      transform-origin: 100% 100%; -webkit-tap-highlight-color: transparent;
     }
     .mini.on { opacity: 1; pointer-events: auto; }
     .say {
