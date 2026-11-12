@@ -37,7 +37,7 @@ import { LINKS } from '../content/shared';
         </div>
       </div>
       <div class="foot">
-        <span>{{ t().contato.footerL }}</span><span class="mono">{{ t().contato.footerR }}</span>
+        <span class="fl"><img class="fmark" src="logo.svg" width="18" height="18" alt="" loading="lazy" />{{ t().contato.footerL }}</span><span class="mono">{{ t().contato.footerR }}</span>
       </div>
     </footer>
   `,
@@ -75,6 +75,8 @@ import { LINKS } from '../content/shared';
       max-width: var(--container); margin: 0 auto; padding: 24px var(--pad-x); border-top: 1px solid var(--line-dark);
       display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; font-size: 13px; opacity: .7;
     }
+    .fl { display: inline-flex; align-items: center; gap: 8px; }
+    .fmark { width: 18px; height: 18px; }
     @media (max-width: 760px) {
       .dark { margin-top: 24px; }
       .inner { padding: 64px 20px; }

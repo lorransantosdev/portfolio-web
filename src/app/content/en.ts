@@ -26,7 +26,7 @@ export const EN: Content = {
     switchTitle: 'Versão em português',
     switchHref: '/',
     resume: 'Résumé ↗',
-    resumeHref: LINKS.resume,
+    resumeHref: LINKS.resumeEn,
     homeAria: 'lorran°, back to top',
     progressAria: 'Reading progress',
   },

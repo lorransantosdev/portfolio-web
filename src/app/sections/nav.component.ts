@@ -11,8 +11,9 @@ import { MotionService } from '../core/motion.service';
   template: `
     <nav class="nav" [attr.aria-label]="t().lang === 'pt' ? 'Principal' : 'Main'">
       <div class="navin">
-        <a class="logo" [href]="base() + '#topo'" [attr.aria-label]="t().nav.homeAria">
-          lorran<span class="deg" aria-hidden="true">°</span>
+        <a #logo class="logo" [href]="base() + '#topo'" [attr.aria-label]="t().nav.homeAria">
+          <img class="mark" src="logo.svg" width="28" height="28" alt="" />
+          <span class="word">lorran<span class="deg" aria-hidden="true">°</span></span>
           <span class="ch" aria-live="off">{{ chapter() ? '/ ' + chapter() : '' }}</span>
         </a>
         <div class="navl">
@@ -23,7 +24,7 @@ import { MotionService } from '../core/motion.service';
         <div class="actions">
           <a class="lang tap" [href]="t().nav.switchHref" [attr.title]="t().nav.switchTitle"
              [attr.hreflang]="t().lang === 'pt' ? 'en' : 'pt-BR'" [attr.lang]="t().lang === 'pt' ? 'en' : 'pt-BR'">{{ t().nav.switchLabel }}</a>
-          <a class="cv tap" [href]="resumeHref()">{{ t().nav.resume }}</a>
+          <a class="cv tap" [href]="t().nav.resumeHref" target="_blank" rel="noopener">{{ t().nav.resume }}</a>
         </div>
       </div>
       <div #prog class="prog" aria-hidden="true"></div>
@@ -43,9 +44,15 @@ import { MotionService } from '../core/motion.service';
     }
     .logo {
       text-decoration: none; font-weight: 600; font-size: 17px; letter-spacing: -.02em;
-      display: inline-flex; align-items: baseline; gap: 10px; white-space: nowrap;
+      display: inline-flex; align-items: center; gap: 10px; white-space: nowrap;
     }
-    .deg { color: var(--red); margin-left: -10px; }
+    .mark {
+      width: 28px; height: 28px; flex: 0 0 auto; margin-right: -4px;
+      animation: mark-in .9s var(--ease) .1s both;
+    }
+    @keyframes mark-in { from { opacity: 0; rotate: -200deg; scale: .4; } to { opacity: 1; rotate: 0deg; scale: 1; } }
+    @media (prefers-reduced-motion: reduce) { .mark { animation: none; } }
+    .deg { color: var(--red); }
     .ch { font-weight: 400; font-size: 14px; color: var(--muted); }
     .navl { display: flex; gap: 22px; font-size: 14px; flex-wrap: wrap; }
     .navl a { text-decoration: none; }
@@ -77,11 +84,8 @@ export class NavComponent {
   readonly t = inject(I18n).t;
   readonly chapter = inject(ChapterService).chapter;
   readonly base = computed(() => (this.t().path === '/' ? '/' : this.t().path));
-  readonly resumeHref = computed(() => {
-    const h = this.t().nav.resumeHref;
-    return h === '#' ? this.base() + '#topo' : h;
-  });
   private prog = viewChild.required<ElementRef<HTMLElement>>('prog');
+  private logo = viewChild.required<ElementRef<HTMLElement>>('logo');
 
   constructor() {
     const motion = inject(MotionService);
@@ -94,6 +98,18 @@ export class NavComponent {
         el.style.transform = 'scaleX(' + (dh > 0 ? Math.min(1, y / dh) : 0).toFixed(4) + ')';
       });
       destroyRef.onDestroy(off);
+      if (motion.reduced || motion.coarse) return;
+      const logo = this.logo().nativeElement;
+      const mark = logo.querySelector<HTMLElement>('.mark')!;
+      let spin: Animation | null = null;
+      const enter = () => {
+        if (spin?.playState === 'running') return;
+        spin = mark.animate([{ rotate: '0deg' }, { rotate: '360deg' }], {
+          duration: 2400, easing: 'cubic-bezier(.45, 0, .25, 1)',
+        });
+      };
+      logo.addEventListener('pointerenter', enter);
+      destroyRef.onDestroy(() => logo.removeEventListener('pointerenter', enter));
     });
   }
 }

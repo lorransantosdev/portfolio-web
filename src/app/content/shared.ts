@@ -16,7 +16,8 @@ export const LINKS = {
   postGs2026: 'https://www.linkedin.com/feed/update/urn:li:activity:7519387795694497792/',
   postNext2026: 'https://www.linkedin.com/feed/update/urn:li:activity:7520523944618258432/',
   postEfetivado: 'https://www.linkedin.com/feed/update/urn:li:activity:7490899249187110912/',
-  resume: '#',
+  resumePt: '/lorran-sarmento-cv-pt.pdf',
+  resumeEn: '/lorran-sarmento-cv-en.pdf',
 } as const;
 
 export const SITE_URL = 'https://lorrandev.vercel.app';

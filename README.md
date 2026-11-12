@@ -34,6 +34,5 @@ O chat do Scott ainda não está ligado. Hoje a seção tem um FAQ e o formulár
 
 ## A fazer
 
-- [ ] Currículo em PDF
 - [ ] Projeto de IA na Cielo
 - [ ] Domínio próprio

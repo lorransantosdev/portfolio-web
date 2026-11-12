@@ -26,7 +26,7 @@ export const PT: Content = {
     switchTitle: 'English version',
     switchHref: '/en',
     resume: 'Currículo ↗',
-    resumeHref: LINKS.resume,
+    resumeHref: LINKS.resumePt,
     homeAria: 'lorran°, voltar ao topo',
     progressAria: 'Progresso da leitura',
   },
