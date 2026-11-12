@@ -1,47 +1,39 @@
-# 📑 Personal Portfolio - README
+# lorran°
 
-## 🖥️ Projeto
+Meu portfólio: [lorrandev](https://github.com/lorransantosdev). Backend na Cielo de dia, MyCarsHub de noite.
 
-Este projeto é um portfólio pessoal desenvolvido com o objetivo de mostrar habilidades, projetos e experiência como desenvolvedor. O portfólio foi construído utilizando as melhores práticas de desenvolvimento web e frameworks modernos para criar uma interface limpa, interativa e responsiva.
+Angular 20 (standalone, signals, zoneless) com prerender estático. As animações em 0 e 1 são Canvas 2D puro, sem lib de animação.
 
-## 🚀 Tecnologias e Bibliotecas Utilizadas
+## Rodando
 
-- **React.js**
-- **Vite**
-- **React Router**
-- **Tailwind CSS**
-- **React Icons**
-- **Vercel**
+```bash
+npm install
+npm start          # http://localhost:4200 e /en
+npm run build      # dist/portfolio-angular/browser
+```
 
-## 🎨 Paleta de Cores Utilizada
+O build gera `index.html` (pt-BR) e `en/index.html`, cada um com seu `lang`, meta e Open Graph.
 
-As seguintes cores foram utilizadas para estilização do projeto:
+## Deploy
 
-| Cor               | Código Hexadecimal | Aplicação                              |
-|-------------------|--------------------|----------------------------------------|
-| Purple Custom     | `#6A00FF`          | Títulos, botões e elementos de destaque |
-| Pink Custom       | `#DA1854`          | Botões em hover e destaques            |
-| Black             | `#000000`          | Fundo do site                          |
-| White             | `#FFFFFF`          | Textos e bordas de inputs              |
-| Gray-900          | `#1A1A1A`          | Background das seções e cards          |
-| Slate-800         | `#2D3748`          | Background de imagens nos cards        |
+Vercel, usando o `vercel.json` da raiz. É só importar o repositório.
 
-## ✒️ Tipografia
-O projeto utiliza as seguintes fontes:
+## Onde ficam as coisas
 
-- **Roboto**: Utilizada para a maioria dos textos e parágrafos, por ser uma fonte sans-serif com boa legibilidade.
-- **Inconsolata**: Utilizada em títulos e destaques, trazendo um toque moderno ao design.
+- Textos: `src/app/content/pt.ts` e `en.ts`
+- Links, e-mail, dados do GitHub: `src/app/content/shared.ts`
+- Cores e fontes: `src/styles.css`
+- Seções: `src/app/sections/`
+- Canvas em 0 e 1: `src/app/binary/`
 
-## 🌟 Funcionalidades
+## Scott com IA
 
-- **Formulário de Contato**: Inputs dinâmicos com validação básica e envio que exibe informações no console.
-- **Visualização de Projetos**: Detalhes dos projetos, como título, descrição, tecnologias e link para o repositório.
-- **Navegação SPA (Single Page Application)**: Transição suave entre páginas com `React Router`.
-- **Links para Redes Sociais**: Ícones para navegação nas redes sociais com `React Icons`.
+O chat do Scott ainda não está ligado. Hoje a seção tem um FAQ e o formulário abre o e-mail.
 
+`api/scott.ts` já chama a API da Anthropic. Pra ligar, configure `ANTHROPIC_API_KEY` e `SCOTT_AI_ENABLED=true` na Vercel e use o `ScottApiService` no formulário.
 
-## 💡 Autor
-Desenvolvido e mantido por Lorran Dos Santos. Para saber mais sobre mim, visite minhas redes sociais que estão no portfólio.
+## A fazer
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- [ ] Currículo em PDF
+- [ ] Projeto de IA na Cielo
+- [ ] Domínio próprio
