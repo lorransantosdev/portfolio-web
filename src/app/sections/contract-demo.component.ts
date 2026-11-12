@@ -99,7 +99,6 @@ export class ContractDemoComponent {
     const motion = inject(MotionService);
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
-      if (motion.reduced) return;
       let timer: ReturnType<typeof setInterval> | undefined;
       const stopIO = motion.observe(this.root().nativeElement, (e) => {
         if (e.isIntersecting && !timer) {

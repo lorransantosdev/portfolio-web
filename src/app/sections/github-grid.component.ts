@@ -72,7 +72,7 @@ export class GithubGridComponent {
 
   private init(): void {
     const cv = this.cv().nativeElement, tip = this.tip().nativeElement;
-    const reduce = this.motion.reduced;
+    const calm = this.motion.reduced;
     const MON = this.t().mycarshub.ghMonths, LBL = this.t().mycarshub.ghLevels;
     const p = GH_START.split('-').map(Number);
     const t0 = Date.UTC(p[0], p[1] - 1, p[2]);
@@ -96,8 +96,8 @@ export class GithubGridComponent {
     const GLY = COL.map((c, l) => glyph(c, l ? 700 : 400));
 
     let W = 0, H = 0, step = 0, dpr = 1, off = 0, COLS = ALLC;
-    let mx = -999, my = -999, start = 0, seen = reduce;
-    const scanning = !reduce && this.motion.coarse;
+    let mx = -999, my = -999, start = 0, seen = false;
+    const scanning = this.motion.coarse;
     let visible = false, scanX = -999;
     const labels = document.createElement('canvas');
 
@@ -138,18 +138,16 @@ export class GithubGridComponent {
       for (const q of cells) {
         if (q.c < off) continue;
         const x = (q.c - off) * step + step / 2, y = TOP + q.r * step + step / 2;
-        const appear = reduce ? 1 : Math.min(1, Math.max(0, (el - q.c * .018) / .35));
+        const appear = Math.min(1, Math.max(0, (el - q.c * .018) / .35));
         if (appear < 1 && seen) busy = true;
         let ch = q.g;
-        if (!reduce) {
-          const dx = x - mx, dy = y - my, dd = Math.sqrt(dx * dx + dy * dy);
-          const near = Math.max(0, 1 - dd / (step * 3.2), .8 - Math.abs(x - scanX) / (step * 2.4));
-          const target = 1 + near * .9;
-          q.s += (target - q.s) * .25;
-          if (Math.abs(target - q.s) > .01) busy = true;
-          if (appear < 1 && appear > 0 && Math.random() < .5) ch = Math.random() < .5 ? '0' : '1';
-          if (near > .45 && Math.random() < .12) { ch = q.g === '1' ? '0' : '1'; busy = true; }
-        }
+        const dx = x - mx, dy = y - my, dd = Math.sqrt(dx * dx + dy * dy);
+        const near = Math.max(0, 1 - dd / (step * 3.2), .8 - Math.abs(x - scanX) / (step * 2.4));
+        const target = 1 + near * (calm ? .3 : .9);
+        q.s += (target - q.s) * .25;
+        if (Math.abs(target - q.s) > .01) busy = true;
+        if (appear < 1 && appear > 0 && Math.random() < .5) ch = Math.random() < .5 ? '0' : '1';
+        if (near > .45 && Math.random() < .12) { ch = q.g === '1' ? '0' : '1'; busy = true; }
         if (appear <= 0) continue;
         const sz = (fs * q.s * GS) / GF;
         g.globalAlpha = appear;
@@ -161,7 +159,6 @@ export class GithubGridComponent {
 
     let running: (() => void) | null = null;
     const kick = () => {
-      if (reduce) { draw(performance.now()); return; }
       if (running) return;
       running = this.motion.add((now) => {
         const keep = draw(now);
@@ -172,19 +169,17 @@ export class GithubGridComponent {
 
     size();
     draw(performance.now());
-    const ro = new ResizeObserver(() => { size(); if (reduce) draw(performance.now()); else kick(); });
+    const ro = new ResizeObserver(() => { size(); kick(); });
     ro.observe(cv);
-    const stopIO = reduce
-      ? () => {}
-      : this.motion.observe(
-          cv,
-          (e) => {
-            visible = e.isIntersecting;
-            if (visible && !seen) { seen = true; start = performance.now(); }
-            if (visible) kick();
-          },
-          { threshold: .3 },
-        );
+    const stopIO = this.motion.observe(
+      cv,
+      (e) => {
+        visible = e.isIntersecting;
+        if (visible && !seen) { seen = true; start = performance.now(); }
+        if (visible) kick();
+      },
+      { threshold: .3 },
+    );
 
     const showTip = (e: MouseEvent): boolean => {
       const b = cv.getBoundingClientRect();
@@ -217,7 +212,6 @@ export class GithubGridComponent {
         tipTimer = setTimeout(() => { mx = my = -999; tip.style.opacity = '0'; kick(); }, 2000);
         return;
       }
-      if (reduce) return;
       start = performance.now(); cells.forEach((q) => (q.s = 1.6)); kick();
     };
     cv.addEventListener('pointermove', move);

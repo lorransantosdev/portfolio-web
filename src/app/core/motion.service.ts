@@ -10,10 +10,16 @@ export class MotionService {
     this.isBrowser && !!window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   readonly coarse: boolean =
     this.isBrowser && !!window.matchMedia && window.matchMedia('(hover: none)').matches;
+  readonly timeline: boolean =
+    this.isBrowser && typeof CSS !== 'undefined' && !!CSS.supports && CSS.supports('animation-timeline: view()');
 
   constructor() {
     // o iOS só aplica :active se a página tiver algum listener de touch
     if (this.coarse) document.addEventListener('touchstart', () => {}, { passive: true });
+  }
+
+  haptic(ms = 10): void {
+    if (this.coarse && typeof navigator.vibrate === 'function') navigator.vibrate(ms);
   }
 
   private tickers = new Set<Ticker>();

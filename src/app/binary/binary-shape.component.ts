@@ -47,22 +47,24 @@ export class BinaryShapeComponent {
 
   private init(): void {
     const cv = this.cv().nativeElement;
-    const W = this.w(), H = this.h(), dpr = dprCap(), reduce = this.motion.reduced;
+    const W = this.w(), H = this.h(), dpr = dprCap(), calm = this.motion.reduced;
     cv.width = W * dpr; cv.height = H * dpr;
     const ctx = cv.getContext('2d')!;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     const G = GL(this.ink(), GLYPH_FONT), GR = GL(RED, GLYPH_FONT_RED);
     const cells: Cell[] = sampleBin(this.shape(), W, H).map((c) => ({
       ...c,
-      x: reduce ? c.hx : Math.random() * W,
-      y: reduce ? c.hy : Math.random() * H,
+      x: calm ? c.hx : Math.random() * W,
+      y: calm ? c.hy : Math.random() * H,
       vx: 0, vy: 0,
       d: Math.random() < .5 ? '0' : '1',
       red: Math.random() < .08,
     }));
 
+    let shown = 0;
     const draw = (now: number, sub: number, active: boolean) => {
       ctx.clearRect(0, 0, W, H);
+      const el = (now - shown) / 1000;
       const R2 = 2600;
       for (const q of cells) {
         if (active) {
@@ -75,19 +77,16 @@ export class BinaryShapeComponent {
             q.vx *= .78; q.vy *= .78; q.x += q.vx; q.y += q.vy;
           }
         }
-        if (active && Math.random() < .02) q.d = q.d === '0' ? '1' : '0';
-        const mv = Math.abs(q.vx) + Math.abs(q.vy) > 1;
-        ctx.globalAlpha = mv ? .95 : q.a;
+        if (sub && Math.random() < .02) q.d = q.d === '0' ? '1' : '0';
+        const ap = calm ? Math.min(1, Math.max(0, (el - (q.hx / W) * .6) / .4)) : 1;
+        const mv = Math.abs(q.vx) + Math.abs(q.vy) > 1 || ap < 1;
+        ctx.globalAlpha = (mv ? .95 : q.a) * ap;
         ctx.drawImage((mv || q.red ? GR : G)[q.d], q.x - 8, q.y - 8, 16, 16);
       }
       ctx.globalAlpha = 1;
     };
 
     const m = { x: -999, y: -999, in: false };
-    if (reduce) {
-      draw(0, 0, false);
-      return;
-    }
 
     let kick = 0, last = 0, started = false, dirty = true, stopTick: (() => void) | null = null;
     let glideAt = 0;
@@ -100,7 +99,7 @@ export class BinaryShapeComponent {
     const tick = (now: number, sub: number) => {
       if (glideAt && now >= glideAt) finger(now);
       if (m.in || now < kick) {
-        draw(now, sub, true);
+        draw(now, sub, !calm);
         dirty = true;
         return;
       }
@@ -127,8 +126,8 @@ export class BinaryShapeComponent {
       (e) => {
         if (e.isIntersecting) {
           if (!started) {
-            started = true; kick = performance.now() + 2600;
-            if (this.motion.coarse) glideAt = performance.now() + 1900;
+            started = true; shown = performance.now(); kick = shown + (calm ? 1200 : 2600);
+            if (this.motion.coarse && !calm) glideAt = shown + 1900;
           }
           if (!stopTick) stopTick = this.motion.add(tick);
         } else if (stopTick) {
@@ -144,6 +143,7 @@ export class BinaryShapeComponent {
     };
     const leave = () => { m.in = false; kick = performance.now() + 1400; };
     const click = () => {
+      if (calm) { shown = performance.now(); kick = shown + 1200; return; }
       kick = performance.now() + 2200;
       cells.forEach((c) => { const a = Math.random() * 6.283, sp = 6 + Math.random() * 16; c.vx += Math.cos(a) * sp; c.vy += Math.sin(a) * sp; });
     };
@@ -154,7 +154,7 @@ export class BinaryShapeComponent {
       for (const q of cells) q.vy += f * (.5 + Math.random());
       kick = Math.max(kick, performance.now() + 900);
     };
-    const stopScroll = this.motion.coarse ? this.motion.onScroll(nudge) : () => {};
+    const stopScroll = this.motion.coarse && !calm ? this.motion.onScroll(nudge) : () => {};
     cv.addEventListener('pointermove', move);
     cv.addEventListener('pointerleave', leave);
     cv.addEventListener('click', click);

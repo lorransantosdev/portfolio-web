@@ -15,10 +15,10 @@ import { BinaryPortraitComponent } from '../binary/binary-portrait.component';
     <header id="topo" class="top">
       <div class="hero">
         <div class="left">
-          <div class="kicker mono"><span class="dot" aria-hidden="true"></span>{{ t().hero.kicker }}</div>
+          <div class="kicker mono ld"><span class="dot" aria-hidden="true"></span>{{ t().hero.kicker }}</div>
           <h1>{{ t().hero.titlePre }}<em>{{ t().hero.titleEm }}</em>{{ t().hero.titlePost }}</h1>
-          <p class="lead">{{ t().hero.lead }}</p>
-          <div class="ctas">
+          <p class="lead ld" style="--d: 2">{{ t().hero.lead }}</p>
+          <div class="ctas ld" style="--d: 3">
             <a magnetic class="btn btn-dark" [href]="base() + '#historia'">{{ t().hero.ctaStory }}</a>
             <a magnetic class="btn btn-line" [href]="base() + '#scott'">{{ t().hero.ctaScott }}</a>
           </div>
@@ -45,7 +45,7 @@ import { BinaryPortraitComponent } from '../binary/binary-portrait.component';
   `,
   styles: `
     :host { display: block; }
-    .top { position: relative; overflow: hidden; border-bottom: 1px solid rgba(0, 0, 0, .1); }
+    .top { position: relative; overflow: clip; border-bottom: 1px solid rgba(0, 0, 0, .1); }
     .hero {
       max-width: var(--container-hero); margin: 0 auto; padding: 56px var(--pad-x) 0;
       display: grid; grid-template-columns: minmax(260px, 1fr) minmax(0, 520px) minmax(220px, 1fr);
@@ -81,7 +81,17 @@ import { BinaryPortraitComponent } from '../binary/binary-portrait.component';
     }
     .nl { display: inline-block; animation: rise .9s var(--ease) both; animation-delay: calc(300ms + var(--i) * 70ms); }
     @keyframes rise { from { opacity: 0; translate: 0 40%; } to { opacity: 1; translate: 0 0; } }
-    @media (prefers-reduced-motion: reduce) { .nl { animation: none; } }
+    .ld { animation: ld .7s var(--ease) both; animation-delay: calc(var(--d, 0) * 90ms + 80ms); }
+    @keyframes ld { from { opacity: 0; translate: 0 18px; } }
+    @keyframes name-drift { to { translate: 0 27vh; } }
+    @supports (animation-timeline: scroll()) {
+      .bigname { animation: name-drift linear both; animation-timeline: scroll(root); animation-range: 0 150vh; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      @keyframes rise { from { opacity: 0; } }
+      @keyframes ld { from { opacity: 0; } }
+      .bigname { animation: none; }
+    }
 
     @media (min-width: 761px) and (max-width: 1024px) {
       .hero { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
@@ -106,7 +116,7 @@ export class HeroComponent {
     const motion = inject(MotionService);
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
-      if (motion.reduced) return;
+      if (motion.reduced || motion.timeline) return;
       const el = this.name().nativeElement;
       const off = motion.onScroll(() => {
         const y = window.scrollY || 0;

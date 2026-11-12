@@ -4,19 +4,20 @@ import {
 import { I18n } from '../core/i18n';
 import { MotionService } from '../core/motion.service';
 import { RevealDirective } from '../core/reveal.directive';
+import { RiseComponent } from '../core/rise.component';
 import { ChapterDirective } from '../core/chapter';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
 
 @Component({
   selector: 'app-cielo',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, ChapterDirective, BinaryShapeComponent],
+  imports: [RevealDirective, RiseComponent, ChapterDirective, BinaryShapeComponent],
   template: `
     <section #sec id="cielo" [chapter]="t().cielo.chapter" [say]="t().cielo.say" class="dark" aria-labelledby="cielo-t">
       <div class="wrap inner">
         <div class="autogrid grid">
           <div>
-            <h2 id="cielo-t" reveal class="title">Cielo</h2>
+            <h2 id="cielo-t" class="title" rise="Cielo"></h2>
             <p class="lead">{{ t().cielo.lead }}</p>
             <div class="roles">
               <div class="role">
@@ -120,8 +121,9 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
       background: var(--red); box-shadow: 0 0 0 6px rgba(217, 29, 4, .25);
     }
     .flowg { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; position: relative; list-style: none; margin: 0; padding: 0; }
-    .fnode { transition: opacity .3s; }
-    .circ { transition: background .3s, border-color .3s; }
+    .fnode { transition: opacity .45s var(--ease); }
+    .circ { transition: background .3s, border-color .3s, scale .45s var(--ease); }
+    .fnode.lit .circ { scale: 1.08; }
     .fnode.lit .circ { border-color: var(--red); }
     .circ {
       width: 46px; height: 46px; border-radius: 50%; background: var(--black); border: 1px solid rgba(249, 242, 234, .4);
@@ -195,7 +197,6 @@ export class CieloComponent {
       const ro = new ResizeObserver(measure);
       ro.observe(this.flow().nativeElement);
       destroyRef.onDestroy(() => ro.disconnect());
-      if (motion.reduced) return;
       const light = (k: number) => {
         if (fk === k) return;
         fk = k;
@@ -206,7 +207,7 @@ export class CieloComponent {
       };
       const tick = (now: number) => {
         const t = now / 1000;
-        card.style.transform =
+        if (!motion.reduced) card.style.transform =
           'perspective(900px) rotateY(' + (Math.sin(t * .6) * 14).toFixed(2) + 'deg) rotateX(' + (Math.cos(t * .5) * 6).toFixed(2) + 'deg)';
         const p = (t * .22) % 1;
         pulse.style.opacity = p > .96 ? '0' : '1';

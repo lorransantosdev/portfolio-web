@@ -51,7 +51,9 @@ import { MotionService } from '../core/motion.service';
       animation: mark-in .9s var(--ease) .1s both;
     }
     @keyframes mark-in { from { opacity: 0; rotate: -200deg; scale: .4; } to { opacity: 1; rotate: 0deg; scale: 1; } }
-    @media (prefers-reduced-motion: reduce) { .mark { animation: none; } }
+    @media (prefers-reduced-motion: reduce) {
+      @keyframes mark-in { from { opacity: 0; scale: .9; } }
+    }
     .deg { color: var(--red); }
     .ch { font-weight: 400; font-size: 14px; color: var(--muted); }
     .navl { display: flex; gap: 22px; font-size: 14px; flex-wrap: wrap; }
@@ -69,6 +71,10 @@ import { MotionService } from '../core/motion.service';
     .prog {
       position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%;
       transform-origin: 0 50%; transform: scaleX(0); background: var(--red);
+    }
+    @keyframes prog { to { transform: scaleX(1); } }
+    @supports (animation-timeline: scroll()) {
+      .prog { animation: prog linear both; animation-timeline: scroll(root); }
     }
     @media (max-width: 760px) {
       .navl { display: none; }
@@ -92,7 +98,7 @@ export class NavComponent {
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
       const el = this.prog().nativeElement;
-      const off = motion.onScroll(() => {
+      const off = motion.timeline ? () => {} : motion.onScroll(() => {
         const y = window.scrollY || 0, vh = window.innerHeight || 800;
         const dh = document.documentElement.scrollHeight - vh;
         el.style.transform = 'scaleX(' + (dh > 0 ? Math.min(1, y / dh) : 0).toFixed(4) + ')';

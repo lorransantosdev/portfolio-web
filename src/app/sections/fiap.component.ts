@@ -1,9 +1,7 @@
-import {
-  ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, inject, viewChildren,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { I18n } from '../core/i18n';
-import { MotionService } from '../core/motion.service';
 import { RevealDirective } from '../core/reveal.directive';
+import { DriftDirective } from '../core/drift.directive';
 import { CountUpDirective } from '../core/countup.directive';
 import { ChapterDirective } from '../core/chapter';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
@@ -11,7 +9,7 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
 @Component({
   selector: 'app-fiap',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, CountUpDirective, ChapterDirective, BinaryShapeComponent],
+  imports: [RevealDirective, DriftDirective, CountUpDirective, ChapterDirective, BinaryShapeComponent],
   template: `
     <section [chapter]="t().fiap.chapter" class="sec" aria-label="FIAP">
       <div class="autogrid grid">
@@ -37,10 +35,12 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
         </div>
         <div class="photos">
           @for (ph of t().fiap.photos; track ph.src; let i = $index) {
-            <figure #ph reveal class="lift pol" [class.p2]="i === 1">
-              <img [src]="ph.src" [alt]="ph.alt" loading="lazy" decoding="async" width="506" height="675" />
-              <figcaption class="mono">{{ ph.caption }}</figcaption>
-            </figure>
+            <div class="pol" [class.p2]="i === 1" [drift]="i ? -.07 : .06">
+              <figure reveal="clip" class="lift card">
+                <img [src]="ph.src" [alt]="ph.alt" loading="lazy" decoding="async" width="506" height="675" />
+                <figcaption class="mono">{{ ph.caption }}</figcaption>
+              </figure>
+            </div>
           }
         </div>
       </div>
@@ -61,12 +61,14 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
     .post { font-size: 12px; opacity: .55; }
     .res { color: var(--red); font-weight: 600; white-space: nowrap; }
     .photos { position: relative; height: 560px; }
-    .pol {
-      position: absolute; left: 0; top: 30px; width: 58%; margin: 0; background: var(--white);
-      padding: 10px 10px 14px; box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .45); transform: rotate(-4deg);
+    .pol { position: absolute; left: 0; top: 30px; width: 58%; }
+    .pol.p2 { left: auto; right: 0; top: 0; width: 56%; }
+    .card {
+      margin: 0; background: var(--white); padding: 10px 10px 14px;
+      box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .45); transform: rotate(-4deg);
     }
-    .pol.p2 { left: auto; right: 0; top: 0; width: 56%; transform: rotate(5deg); }
-    .pol img { width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; display: block; }
+    .p2 .card { transform: rotate(5deg); }
+    .card img { width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; display: block; }
     figcaption { font-size: 11px; margin-top: 10px; }
     @media (max-width: 760px) {
       .sec { padding: 56px 20px 24px; }
@@ -76,24 +78,4 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
 })
 export class FiapComponent {
   readonly t = inject(I18n).t;
-  private phs = viewChildren<ElementRef<HTMLElement>>('ph');
-
-  constructor() {
-    const motion = inject(MotionService);
-    const destroyRef = inject(DestroyRef);
-    afterNextRender(() => {
-      if (motion.reduced) return;
-      const els = this.phs().map((r) => r.nativeElement);
-      const off = motion.onScroll(() => {
-        const vh = window.innerHeight || 800;
-        els.forEach((el, k) => {
-          const r = el.getBoundingClientRect();
-          if (r.bottom < -200 || r.top > vh + 200) return;
-          const o = (r.top + r.height / 2 - vh / 2) * (k ? -.06 : .05);
-          el.style.translate = '0 ' + o.toFixed(1) + 'px';
-        });
-      });
-      destroyRef.onDestroy(off);
-    });
-  }
 }

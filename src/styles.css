@@ -26,7 +26,8 @@
   --radius-card: 18px;
   --radius-card-lg: 24px;
   --radius-card-xl: 28px;
-  --ease: cubic-bezier(.2, .8, .2, 1);
+  --ease: cubic-bezier(.22, 1, .36, 1);
+  --ease-io: cubic-bezier(.65, 0, .35, 1);
 }
 
 @media (max-width: 760px) {
@@ -39,6 +40,7 @@ html {
   scroll-padding-top: 72px;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 body {
   margin: 0;
@@ -70,7 +72,8 @@ button { font: inherit; }
 .wrap { max-width: var(--container); margin: 0 auto; padding-left: var(--pad-x); padding-right: var(--pad-x); }
 
 @keyframes bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 6px; } }
-.bob { display: inline-block; animation: bob 1.6s ease-in-out infinite; color: var(--red); }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+.bob { display: inline-block; animation: bob 1.6s var(--ease-io) infinite; color: var(--red); }
 
 .lift { transition: translate .35s var(--ease), box-shadow .35s; }
 .lift:hover { translate: 0 -6px; box-shadow: 0 40px 60px -36px rgba(0, 0, 0, .45); }
@@ -111,7 +114,12 @@ button { font: inherit; }
   20% { opacity: 1; scale: 1.1; }
   100% { opacity: 0; scale: 1; translate: var(--dx, 0) -90px; }
 }
-.heart { position: absolute; pointer-events: none; font-size: 22px; color: var(--red); animation: pop 1.1s ease-out forwards; }
+@keyframes pop-soft {
+  0% { opacity: 0; scale: .9; }
+  25% { opacity: 1; scale: 1; }
+  100% { opacity: 0; }
+}
+.heart { position: absolute; pointer-events: none; font-size: 22px; color: var(--red); animation: pop 1.1s var(--ease) forwards; }
 @keyframes zoom {
   0% { rotate: 0deg; translate: 0 0; }
   25% { translate: -60px -20px; }
@@ -129,14 +137,74 @@ button { font: inherit; }
 }
 
 @media (hover: none) {
-  .btn, .tap, .press { transition: scale .18s var(--ease); -webkit-tap-highlight-color: transparent; }
+  .btn, .tap, .press { transition: scale .18s var(--ease); }
   .lift { transition: translate .35s var(--ease), box-shadow .35s, scale .18s var(--ease); }
   .crow { transition: padding .25s, color .25s, scale .18s var(--ease); }
   .btn:active, .tap:active, .press:active, .lift:active, .crow:active { scale: .97; }
 }
 
+[reveal] { --rv-y: 36px; }
+@keyframes rv { from { opacity: 0; translate: 0 var(--rv-y); } }
+@keyframes rv-clip {
+  from { opacity: 0; clip-path: inset(34% 7% 0 7% round 28px); }
+  30% { opacity: 1; }
+  to { clip-path: inset(-20% -20% -20% -20% round 0); }
+}
+@keyframes drift {
+  from { translate: 0 calc((50vh + 50%) * var(--drift, 0)); }
+  to { translate: 0 calc((50vh + 50%) * var(--drift, 0) * -1); }
+}
+
+.rise .wm { display: inline-block; clip-path: inset(-.2em -.25em -.12em -.25em); }
+.rise .wi { display: inline-block; }
+.rise .em { font-style: italic; }
+@keyframes word { from { opacity: 0; translate: 0 105%; } }
+
+.rv-wait { opacity: 0; translate: 0 var(--rv-y); }
+.rv-wait[reveal='clip'] { translate: none; clip-path: inset(34% 7% 0 7% round 28px); }
+.rv-wait.rv-in {
+  opacity: 1; translate: 0 0; clip-path: inset(-20% -20% -20% -20% round 0);
+  transition: opacity .55s var(--ease), translate .7s var(--ease), clip-path .9s var(--ease);
+  transition-delay: calc(var(--rv-i, 0) * 80ms);
+}
+.rise-wait .wi { opacity: 0; translate: 0 105%; }
+.rise-in .wi {
+  opacity: 1; translate: 0 0;
+  transition: opacity .5s var(--ease), translate .7s var(--ease);
+  transition-delay: calc(var(--wi, 0) * 70ms);
+}
+
+@supports (animation-timeline: view()) {
+  [reveal] {
+    animation: rv var(--ease) both;
+    animation-timeline: view();
+    animation-range: entry calc(var(--rv-i, 0) * 8%) entry calc(72% + var(--rv-i, 0) * 8%);
+  }
+  [reveal='clip'] {
+    animation-name: rv-clip;
+    animation-range: entry 5% cover 42%;
+  }
+  .rise { view-timeline: --rise block; }
+  .rise .wi {
+    animation: word var(--ease) both;
+    animation-timeline: --rise;
+    animation-range: entry calc(15% + var(--wi, 0) * 9%) entry calc(70% + var(--wi, 0) * 7%);
+  }
+  [drift] {
+    animation: drift linear both;
+    animation-timeline: view();
+    animation-range: cover;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
-  .bob, .heart, .zoom { animation: none; }
-  *, *::before, *::after { transition-duration: .01ms !important; }
+  [reveal] { --rv-y: 0px; }
+  @keyframes rv-clip { from { opacity: 0; } }
+  @keyframes word { from { opacity: 0; } }
+  .rise-wait .wi { translate: none; }
+  [drift] { animation: none; translate: none; }
+  .bob { animation-name: blink; }
+  .heart { animation-name: pop-soft; }
+  .zoom { animation: none; }
 }

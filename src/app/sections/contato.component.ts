@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { I18n } from '../core/i18n';
 import { RevealDirective } from '../core/reveal.directive';
+import { RiseComponent } from '../core/rise.component';
 import { MagneticDirective } from '../core/magnetic.directive';
 import { ChapterDirective } from '../core/chapter';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
@@ -9,19 +10,19 @@ import { LINKS } from '../content/shared';
 @Component({
   selector: 'app-contato',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, MagneticDirective, ChapterDirective, BinaryShapeComponent],
+  imports: [RevealDirective, RiseComponent, MagneticDirective, ChapterDirective, BinaryShapeComponent],
   template: `
     <footer id="contato" [chapter]="t().contato.chapter" class="dark" aria-labelledby="contato-t">
       <div class="inner">
         <div class="col1">
           <div reveal class="env"><app-binary shape="envelope" [w]="230" [h]="160" ink="#f9f2ea" /></div>
-          <h2 id="contato-t" reveal class="title">{{ t().contato.titleA }}<em>{{ t().contato.titleEm }}</em></h2>
+          <h2 id="contato-t" class="title" [rise]="t().contato.titleA" [em]="t().contato.titleEm"></h2>
           <p class="lead">{{ t().contato.lead }}</p>
           <div class="ctas">
             <a magnetic class="btn cta light" [href]="links.mailto">{{ t().contato.ctaMail }}</a>
             <a magnetic class="btn cta line" [href]="links.whatsapp">{{ t().contato.ctaWhats }}</a>
           </div>
-          <img class="photo" src="assets/lorran-contato.webp" width="506" height="675" [alt]="t().contato.photoAlt" loading="lazy" decoding="async" />
+          <img reveal="clip" class="photo" src="assets/lorran-contato.webp" width="506" height="675" [alt]="t().contato.photoAlt" loading="lazy" decoding="async" />
         </div>
         <div class="col2">
           <h3 class="find mono">{{ t().contato.findLabel }}</h3>
@@ -52,8 +53,7 @@ import { LINKS } from '../content/shared';
     .col2 { flex: 1 1 460px; min-width: 0; padding-top: 12px; }
     .env { margin-bottom: 26px; }
     .title { margin: 22px 0 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(64px, 8vw, 124px); line-height: .86; letter-spacing: -.03em; }
-    .title em { font-style: italic; }
-    .lead { font-size: 18px; line-height: 1.55; opacity: .8; margin: 22px 0 0; max-width: 440px; }
+        .lead { font-size: 18px; line-height: 1.55; opacity: .8; margin: 22px 0 0; max-width: 440px; }
     .ctas { display: flex; gap: 12px; margin-top: 28px; flex-wrap: wrap; }
     .cta { height: 56px; padding: 0 26px; font-size: 16px; }
     .cta.light { background: var(--cream); color: var(--black); }

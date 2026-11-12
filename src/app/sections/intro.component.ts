@@ -50,7 +50,6 @@ export class IntroComponent {
     const motion = inject(MotionService);
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
-      if (motion.reduced) return;
       const p = this.p().nativeElement;
       const words = Array.from(p.querySelectorAll<HTMLElement>('.w'));
       const state: string[] = [];
@@ -72,7 +71,7 @@ export class IntroComponent {
             });
             if (first) {
               first = false;
-              requestAnimationFrame(() => words.forEach((w) => (w.style.transition = 'opacity .35s')));
+              requestAnimationFrame(() => words.forEach((w) => (w.style.transition = 'opacity .45s var(--ease)')));
             }
           });
         },

@@ -44,7 +44,7 @@ import { MotionService } from '../core/motion.service';
     .layer {
       display: grid; grid-template-columns: 64px 150px minmax(0, 1fr); gap: 18px; align-items: baseline;
       padding: 18px 14px; border-top: 1px solid rgba(0, 0, 0, .16);
-      transition: background .25s, color .25s, padding .25s; cursor: default;
+      transition: background .35s var(--ease), color .35s var(--ease), padding .45s var(--ease); cursor: default;
     }
     .layer.last { border-bottom: 1px solid rgba(0, 0, 0, .16); }
     .layer.on { background: var(--black); color: var(--cream); padding-left: 26px; }
@@ -81,7 +81,6 @@ export class StackPilhaComponent {
     const motion = inject(MotionService);
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
-      if (motion.reduced) return;
       const wrap = this.stack().nativeElement;
       const layers = Array.from(wrap.querySelectorAll<HTMLElement>('.layer'));
       const cleanups: (() => void)[] = [];
@@ -144,9 +143,12 @@ export class StackPilhaComponent {
           if (!e.isIntersecting) return;
           stopIO();
           layers.forEach((L, i) =>
-            L.animate([{ opacity: 0, translate: '0 -28px' }, { opacity: 1, translate: '0 0' }], {
-              duration: 520, delay: i * 90, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards',
-            }),
+            L.animate(
+              motion.reduced
+                ? [{ opacity: 0 }, { opacity: 1 }]
+                : [{ opacity: 0, translate: '0 -36px', scale: '.98' }, { opacity: 1, translate: '0 0', scale: '1' }],
+              { duration: 640, delay: i * 90, easing: 'cubic-bezier(.22,1,.36,1)', fill: 'backwards' },
+            ),
           );
         },
         { threshold: .25 },

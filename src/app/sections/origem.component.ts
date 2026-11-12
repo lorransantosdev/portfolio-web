@@ -1,18 +1,19 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { I18n } from '../core/i18n';
 import { RevealDirective } from '../core/reveal.directive';
+import { RiseComponent } from '../core/rise.component';
 import { ChapterDirective } from '../core/chapter';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
 
 @Component({
   selector: 'app-origem',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, ChapterDirective, BinaryShapeComponent],
+  imports: [RevealDirective, RiseComponent, ChapterDirective, BinaryShapeComponent],
   template: `
     <section [chapter]="t().origem.chapter" class="sec" aria-labelledby="origem-t">
       <div class="autogrid grid">
         <div>
-          <h2 id="origem-t" reveal class="title">{{ t().origem.title }}</h2>
+          <h2 id="origem-t" class="title" [rise]="t().origem.title"></h2>
           <div reveal class="bins">
             <app-binary shape="queijo" [w]="220" [h]="150" ink="#000000" />
             <app-binary shape="anel" [w]="170" [h]="150" ink="#000000" />

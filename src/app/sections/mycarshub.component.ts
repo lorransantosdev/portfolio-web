@@ -1,9 +1,8 @@
-import {
-  ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRender, inject, viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { I18n } from '../core/i18n';
-import { MotionService } from '../core/motion.service';
 import { RevealDirective } from '../core/reveal.directive';
+import { RiseComponent } from '../core/rise.component';
+import { DriftDirective } from '../core/drift.directive';
 import { MagneticDirective } from '../core/magnetic.directive';
 import { ChapterDirective } from '../core/chapter';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
@@ -15,13 +14,13 @@ import { GithubGridComponent } from './github-grid.component';
   selector: 'app-mycarshub',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    RevealDirective, MagneticDirective, ChapterDirective, BinaryShapeComponent,
+    RevealDirective, RiseComponent, DriftDirective, MagneticDirective, ChapterDirective, BinaryShapeComponent,
     ContractDemoComponent, StackPilhaComponent, GithubGridComponent,
   ],
   template: `
     <section id="mycarshub" [chapter]="t().mycarshub.chapter" [say]="t().mycarshub.say" class="sec" aria-labelledby="mch-t">
       <div class="head">
-        <h2 id="mch-t" reveal class="title">MyCarsHub</h2>
+        <h2 id="mch-t" class="title" rise="MyCarsHub"></h2>
         <p class="lead">{{ t().mycarshub.lead }}</p>
       </div>
 
@@ -32,14 +31,14 @@ import { GithubGridComponent } from './github-grid.component';
       <app-contract-demo />
 
       <div class="dash">
-        <div class="win">
+        <div reveal="clip" class="win">
           <div class="bar">
             <span class="d" style="background: #ff5f57"></span><span class="d" style="background: #febc2e"></span><span class="d" style="background: #28c840"></span>
             <span class="url mono">{{ t().mycarshub.dashLabel }}</span>
           </div>
           <img src="assets/mycarshub-dashboard.webp" width="1192" height="677" [alt]="t().mycarshub.dashAlt" loading="lazy" decoding="async" />
         </div>
-        <img #phone class="phone" src="assets/mycarshub-celular.webp" width="289" height="573" [alt]="t().mycarshub.phoneAlt" loading="lazy" decoding="async" />
+        <img class="phone" [drift]="-.14" src="assets/mycarshub-celular.webp" width="289" height="573" [alt]="t().mycarshub.phoneAlt" loading="lazy" decoding="async" />
         <div class="pay">
           <div class="pt">{{ t().mycarshub.badgeTitle }}</div>
           <div class="ps">{{ t().mycarshub.badgeSub }}</div>
@@ -83,7 +82,7 @@ import { GithubGridComponent } from './github-grid.component';
     .red { color: var(--red); }
     .car { display: flex; flex-direction: column; align-items: center; margin-top: 70px; gap: 8px; }
 
-    .dash { margin-top: 36px; border-radius: var(--radius-card-lg); background: var(--red); position: relative; padding: 64px 56px 0; overflow: hidden; }
+    .dash { margin-top: 36px; border-radius: var(--radius-card-lg); background: var(--red); position: relative; padding: 64px 56px 0; overflow: clip; }
     .win { max-width: 920px; margin: 0 auto; border-radius: 14px 14px 0 0; overflow: hidden; box-shadow: 0 50px 90px -30px rgba(0, 0, 0, .65); background: #141414; }
     .bar { height: 34px; display: flex; align-items: center; gap: 7px; padding: 0 14px; background: #1f1f1f; }
     .d { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
@@ -118,21 +117,4 @@ import { GithubGridComponent } from './github-grid.component';
 })
 export class MycarshubComponent {
   readonly t = inject(I18n).t;
-  private phone = viewChild.required<ElementRef<HTMLElement>>('phone');
-
-  constructor() {
-    const motion = inject(MotionService);
-    const destroyRef = inject(DestroyRef);
-    afterNextRender(() => {
-      if (motion.reduced) return;
-      const el = this.phone().nativeElement;
-      const off = motion.onScroll(() => {
-        const vh = window.innerHeight || 800;
-        const r = el.getBoundingClientRect();
-        if (r.bottom < -300 || r.top > vh + 300) return;
-        el.style.translate = '0 ' + ((r.top - vh / 2) * -.12).toFixed(1) + 'px';
-      });
-      destroyRef.onDestroy(off);
-    });
-  }
 }

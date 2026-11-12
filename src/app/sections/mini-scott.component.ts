@@ -55,7 +55,6 @@ export class MiniScottComponent {
         const on = y > vh * .8 && !inScott;
         if (on !== this.on()) {
           this.on.set(on);
-          if (motion.reduced) return;
           if (on && !stopTick) {
             stopTick = motion.add((now) => {
               img.style.translate = '0 ' + (Math.sin((now / 1000) * 2.2) * 4).toFixed(1) + 'px';

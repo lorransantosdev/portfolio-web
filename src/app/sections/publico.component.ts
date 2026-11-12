@@ -1,19 +1,20 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { I18n } from '../core/i18n';
 import { RevealDirective } from '../core/reveal.directive';
+import { RiseComponent } from '../core/rise.component';
 import { ChapterDirective } from '../core/chapter';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
 
 @Component({
   selector: 'app-publico',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RevealDirective, ChapterDirective, BinaryShapeComponent],
+  imports: [RevealDirective, RiseComponent, ChapterDirective, BinaryShapeComponent],
   template: `
     <section id="publico" [chapter]="t().publico.chapter" [say]="t().publico.say" class="sec" aria-labelledby="pub-t">
       <div class="autogrid grid">
         <div>
           <div reveal class="at"><app-binary shape="arroba" [w]="170" [h]="170" ink="#000000" /></div>
-          <h2 id="pub-t" reveal class="title">&#64;lorrandev</h2>
+          <h2 id="pub-t" class="title" rise="@lorrandev"></h2>
           <p class="text">{{ t().publico.text }}</p>
           <div class="chips">
             @for (c of t().publico.chips; track c.href) {

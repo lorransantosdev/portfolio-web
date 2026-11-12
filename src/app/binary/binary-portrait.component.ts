@@ -17,8 +17,10 @@ const CW = 7, CH = 8, FW = 700, FH = 648;
 interface Cell {
   hx: number; hy: number; x: number; y: number; vx: number; vy: number;
   a: number; d: '0' | '1'; delay: number;
-  st: number;
+  st: number; th: number; r: number;
 }
+
+const FLY = .7;
 
 @Component({
   selector: 'app-binary-portrait',
@@ -45,10 +47,12 @@ export class BinaryPortraitComponent {
 
   private init(): void {
     const cv = this.cv().nativeElement;
-    const dpr = dprCap(), reduce = this.motion.reduced;
-    cv.width = FW * dpr; cv.height = FH * dpr;
+    const calm = this.motion.reduced;
+    // no celular o canvas aparece com ~350px: desenhar em 700px só gasta preenchimento
+    const res = Math.min(1, (cv.clientWidth || FW) / FW) * dprCap();
+    cv.width = Math.round(FW * res); cv.height = Math.round(FH * res);
     const ctx = cv.getContext('2d')!;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.setTransform(res, 0, 0, res, 0, 0);
     const GB = GL('#000000', GLYPH_FONT), GR = GL(RED, GLYPH_FONT_RED);
 
     const cells: Cell[] = [];
@@ -60,11 +64,12 @@ export class BinaryPortraitComponent {
         const ch = row[k];
         if (ch === ' ') continue;
         const hx = k * CW + CW / 2, hy = r * CH + CH / 2;
+        const th = Math.atan2(hy - cy, hx - cx), rr = Math.hypot(hx - cx, hy - cy);
         const q: Cell = {
           hx, hy, x: hx, y: hy, vx: 0, vy: 0, a: +ch / 9,
           d: Math.random() < .5 ? '0' : '1',
-          delay: Math.hypot(hx - cx, hy - cy) / 520 + Math.random() * .35,
-          st: 0,
+          delay: ((th + Math.PI) / (Math.PI * 2)) * .75 + rr / 900 + Math.random() * .12,
+          st: 0, th, r: rr,
         };
         cells.push(q);
         grid[r * GC + k] = q;
@@ -74,7 +79,7 @@ export class BinaryPortraitComponent {
     const m = { x: -999, y: -999, in: false };
     const R2 = 5200, R = Math.sqrt(R2);
     let kicked = 0, lastFlip = 0, dirty = false, pending = cells.length;
-    const t0 = performance.now();
+    let t0 = 0;
     const STEPS = 6; // a entrada de cada dígito é quantizada em 6 passos de opacidade
 
     const clearBox = (q: Cell) => ctx.clearRect(q.hx - CW / 2, q.hy - CH / 2, CW, CH);
@@ -82,7 +87,7 @@ export class BinaryPortraitComponent {
       ctx.globalAlpha = alpha;
       ctx.drawImage((red ? GR : GB)[q.d], q.x - 8, q.y - 8, 16, 16);
     };
-    const showOf = (q: Cell, el: number) => (reduce ? 1 : Math.min(1, Math.max(0, (el - q.delay) / .35)));
+    const showOf = (q: Cell, el: number) => Math.min(1, Math.max(0, (el - q.delay) / .35));
 
     const full = (el: number, steps: number) => {
       ctx.clearRect(0, 0, FW, FH);
@@ -120,6 +125,46 @@ export class BinaryPortraitComponent {
       }
       ctx.globalAlpha = 1;
     };
+
+    let flying = !calm;
+    // quem já chegou vai pra uma camada fixa; por quadro só se desenha quem ainda está voando
+    const base = document.createElement('canvas');
+    base.width = cv.width; base.height = cv.height;
+    const bctx = base.getContext('2d')!;
+    bctx.setTransform(res, 0, 0, res, 0, 0);
+    const lite = cv.clientWidth > 0 && cv.clientWidth < 500;
+    const fly = (el: number) => {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      ctx.globalAlpha = 1;
+      ctx.drawImage(base, 0, 0);
+      ctx.setTransform(res, 0, 0, res, 0, 0);
+      let left = 0;
+      for (let i = 0; i < cells.length; i++) {
+        const q = cells[i];
+        if (q.st === STEPS) continue;
+        const p = Math.min(1, Math.max(0, (el - q.delay) / FLY));
+        if (p >= 1) {
+          q.st = STEPS; q.x = q.hx; q.y = q.hy;
+          bctx.globalAlpha = q.a;
+          bctx.drawImage(GB[q.d], q.hx - 8, q.hy - 8, 16, 16);
+          put(q, false, q.a);
+          continue;
+        }
+        left++;
+        if (p <= 0 || (lite && (q.a < .35 || i % 3 === 0))) continue;
+        const e = 1 - Math.pow(1 - p, 4);
+        const ang = q.th + (1 - e) * 2.4, rad = q.r * (1 + (1 - e) * .7);
+        q.x = cx + Math.cos(ang) * rad; q.y = cy + Math.sin(ang) * rad;
+        put(q, true, Math.min(1, p * 2.5) * Math.max(.55, q.a));
+      }
+      ctx.globalAlpha = 1;
+      if (left) return;
+      flying = false;
+      cells.forEach((q) => { q.vx = q.vy = 0; });
+      pending = 0;
+    };
+    const flyEnd = Math.max(...cells.map((q) => q.delay)) + FLY;
 
     const awake = new Set<Cell>();
     const span = (a: number, b: number, size: number, max: number): [number, number] =>
@@ -183,7 +228,9 @@ export class BinaryPortraitComponent {
 
     const draw = (now: number, sub: number) => {
       if (glideAt && now >= glideAt) finger(now);
+      if (!t0) t0 = now;
       const el = (now - t0) / 1000;
+      if (flying) { fly(el); return; }
       if (kicked > now || (m.in && pending > 0)) {
         full(el, sub);
         dirty = true;
@@ -211,17 +258,12 @@ export class BinaryPortraitComponent {
       ctx.globalAlpha = 1;
     };
 
-    if (reduce) {
-      full(1e3, 0);
-      return;
-    }
-
     let stopTick: (() => void) | null = null, seen = false;
     const stopIO = this.motion.observe(
       cv,
       (e) => {
         if (e.isIntersecting) {
-          if (!seen && this.motion.coarse) glideAt = Math.max(performance.now() + 600, t0 + 2400);
+          if (!seen && this.motion.coarse && !calm) glideAt = performance.now() + flyEnd * 1000 + 400;
           seen = true;
           if (!stopTick) stopTick = this.motion.add(draw);
         }
@@ -236,6 +278,7 @@ export class BinaryPortraitComponent {
     };
     const leave = () => { m.x = m.y = -999; m.in = false; };
     const burst = () => {
+      if (calm) return;
       kicked = performance.now() + 2500;
       cells.forEach((q) => { const a = Math.random() * Math.PI * 2, s = 10 + Math.random() * 30; q.vx += Math.cos(a) * s; q.vy += Math.sin(a) * s; });
     };
@@ -246,7 +289,7 @@ export class BinaryPortraitComponent {
       for (const q of cells) q.vy += f * (.5 + Math.random());
       kicked = Math.max(kicked, performance.now() + 1000);
     };
-    const stopScroll = this.motion.coarse ? this.motion.onScroll(nudge) : () => {};
+    const stopScroll = this.motion.coarse && !calm ? this.motion.onScroll(nudge) : () => {};
     cv.addEventListener('pointermove', move);
     cv.addEventListener('pointerleave', leave);
     cv.addEventListener('click', burst);

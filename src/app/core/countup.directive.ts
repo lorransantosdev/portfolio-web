@@ -16,7 +16,6 @@ export class CountUpDirective {
   constructor() {
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
-      if (this.motion.reduced) return;
       const el = this.el;
       if (el.getBoundingClientRect().top > window.innerHeight) el.textContent = this.format(0);
       else return; // já visível no carregamento: mostra o valor final direto

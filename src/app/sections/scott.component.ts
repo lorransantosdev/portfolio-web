@@ -4,6 +4,7 @@ import {
 import { I18n } from '../core/i18n';
 import { MotionService } from '../core/motion.service';
 import { ChapterDirective } from '../core/chapter';
+import { RiseComponent } from '../core/rise.component';
 import { BinaryShapeComponent } from '../binary/binary-shape.component';
 import { LINKS } from '../content/shared';
 import { ScottPose } from '../content/types';
@@ -20,7 +21,7 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
 @Component({
   selector: 'app-scott',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ChapterDirective, BinaryShapeComponent],
+  imports: [ChapterDirective, RiseComponent, BinaryShapeComponent],
   template: `
     <section #sec id="scott" [chapter]="t().scott.chapter" class="sec" aria-labelledby="scott-faq-t">
       <div class="autogrid grid">
@@ -47,7 +48,7 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
         </div>
 
         <div>
-          <h2 id="scott-faq-t" class="ftitle">{{ t().scott.faqTitleA }}<br /><em>{{ t().scott.faqTitleEm }}</em></h2>
+          <h2 id="scott-faq-t" class="ftitle" [rise]="t().scott.faqTitleA" [em]="t().scott.faqTitleEm" [br]="true"></h2>
           <p class="flead">{{ t().scott.faqLead }}</p>
           <div class="faqs">
             @for (f of t().scott.faqs; track $index; let i = $index) {
@@ -93,9 +94,10 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
     .heart { z-index: 5; }
     .petbtn { display: block; width: 100%; background: none; border: 0; padding: 0; cursor: pointer; position: relative; }
     .petbtn:focus-visible { outline-offset: -4px; }
+    .fq button:active .sign { scale: .8; }
     .scott {
       position: relative; display: block; width: 78%; max-width: 380px; margin: 0 auto; height: auto;
-      transform-origin: 50% 100%; transition: transform .35s cubic-bezier(.3, .7, .3, 1);
+      transform-origin: 50% 100%; transition: transform .45s cubic-bezier(.34, 1.56, .64, 1);
     }
     .scott.jump { transform: translateY(-34px); }
     .hint { position: absolute; left: 0; bottom: 8px; font-size: 11px; color: var(--muted); }
@@ -105,8 +107,7 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
     .desc { font-size: 15px; color: var(--body); margin-top: 4px; }
 
     .ftitle { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: clamp(36px, 4vw, 52px); line-height: 1; letter-spacing: -.02em; }
-    .ftitle em { font-style: italic; }
-    .flead { font-size: 16px; color: var(--body); margin: 14px 0 0; }
+        .flead { font-size: 16px; color: var(--body); margin: 14px 0 0; }
     .faqs { display: flex; flex-direction: column; margin-top: 22px; border-bottom: 1px solid var(--line); }
     .faq { border-top: 1px solid var(--line); }
     .fq { margin: 0; font: inherit; }
@@ -116,12 +117,16 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
       min-height: 44px;
     }
     .fq button:hover { color: var(--red); }
-    .sign { color: var(--red); font-size: 22px; line-height: 1; transition: rotate .25s; flex: 0 0 auto; }
+    .sign { color: var(--red); font-size: 22px; line-height: 1; transition: rotate .45s var(--ease); flex: 0 0 auto; }
     .faq.open .sign { rotate: 45deg; }
-    .fa { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .25s ease, visibility .25s; visibility: hidden; }
+    .fa { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .5s var(--ease), visibility .5s; visibility: hidden; }
     .faq.open .fa { grid-template-rows: 1fr; visibility: visible; }
     .fain { overflow: hidden; min-height: 0; }
-    .faw { display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 12px; padding: 0 0 18px; }
+    .faw {
+      display: grid; grid-template-columns: 54px minmax(0, 1fr); gap: 12px; padding: 0 0 18px;
+      opacity: 0; translate: 0 -6px; transition: opacity .35s, translate .5s var(--ease);
+    }
+    .faq.open .faw { opacity: 1; translate: 0 0; transition-delay: .08s; }
     .who { font-size: 11px; color: var(--red); padding-top: 4px; }
     .ans { font-size: 16px; line-height: 1.6; color: var(--body-2); }
 
@@ -141,6 +146,10 @@ interface Heart { id: number; c: string; left: number; top: number; dx: number; 
     .send:hover { background: var(--red); }
     .note { font-size: 11px; color: var(--muted); margin-top: 10px; }
     @media (max-width: 760px) { .sec { padding: 56px 20px 24px; } }
+    @media (prefers-reduced-motion: reduce) {
+      .scott.jump { transform: none; }
+      .faw { translate: none; }
+    }
   `,
 })
 export class ScottComponent {
@@ -189,6 +198,7 @@ export class ScottComponent {
   }
 
   pet(): void {
+    this.motion.haptic();
     const now = Date.now();
     this.pets = this.pets.filter((x) => now - x < 2500);
     this.pets.push(now);
@@ -204,7 +214,7 @@ export class ScottComponent {
     this.hearts.update((h) => [...h, ...hs].slice(-16));
     this.later('hearts', 1300, () => this.hearts.set([]));
     this.bounce(900);
-    if (this.pets.length >= 5) {
+    if (this.pets.length >= 5 && !this.motion.reduced) {
       this.pets = [];
       this.zoom.set(true);
       this.say(this.t().scott.zoomies, 1500);
@@ -226,6 +236,7 @@ export class ScottComponent {
     const o = this.open() === i ? -1 : i;
     this.open.set(o);
     if (o >= 0) {
+      this.motion.haptic(8);
       this.bounce(900);
       this.wagUntil = performance.now() + 1100;
     }
@@ -248,8 +259,8 @@ export class ScottComponent {
     destroyRef.onDestroy(() => Object.values(this.timers).forEach(clearTimeout));
     afterNextRender(() => {
       Object.values(POSE).forEach((p) => { const im = new Image(); im.decoding = 'async'; im.src = p.src; });
-      if (this.motion.reduced) return;
       const sec = this.sec().nativeElement;
+      const calm = this.motion.reduced;
       const img = this.img().nativeElement;
       const move = (e: PointerEvent) => {
         const r = sec.getBoundingClientRect();
@@ -261,8 +272,8 @@ export class ScottComponent {
       const tick = (now: number) => {
         if (this.zoom()) return;
         const t = now / 1000;
-        const wag = now < this.wagUntil ? Math.sin(t * 22) * 5 : Math.floor(t) % 7 === 0 ? Math.sin(t * 18) * 3 : 0;
-        img.style.rotate = (this.lean * 7 + wag).toFixed(2) + 'deg';
+        const wag = calm ? 0 : now < this.wagUntil ? Math.sin(t * 22) * 5 : Math.floor(t) % 7 === 0 ? Math.sin(t * 18) * 3 : 0;
+        img.style.rotate = ((calm ? 0 : this.lean * 7) + wag).toFixed(2) + 'deg';
         const b = Math.sin(t * 2.4) * .012;
         img.style.scale = (1 + b).toFixed(4) + ' ' + (1 - b).toFixed(4);
       };
