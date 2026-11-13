@@ -112,8 +112,7 @@ export interface Content {
     linkedin: Link;
     doLabel: string;
     does: string[];
-    doAi: { text: string; placeholder: string };
-    doNumber: string;
+    doAi: string;
     cardCaption: string;
     flowTitle: string;
     flowNote: string;

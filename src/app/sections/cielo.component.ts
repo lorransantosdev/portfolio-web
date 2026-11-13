@@ -39,8 +39,7 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
               @for (d of t().cielo.does; track $index) {
                 <div reveal class="do">{{ d }}</div>
               }
-              <div reveal class="do">{{ t().cielo.doAi.text }} <span class="ph">{{ t().cielo.doAi.placeholder }}</span></div>
-              <div reveal class="do ph">{{ t().cielo.doNumber }}</div>
+              <div reveal class="do">{{ t().cielo.doAi }}</div>
             </div>
           </div>
           <div class="cardcol">
@@ -108,7 +107,6 @@ import { BinaryShapeComponent } from '../binary/binary-shape.component';
     .dolabel { font-size: 12px; opacity: .6; margin-top: 30px; }
     .does { display: flex; flex-direction: column; margin-top: 6px; }
     .do { padding: 12px 0; border-bottom: 1px solid rgba(249, 242, 234, .14); font-size: 16px; line-height: 1.5; }
-    .ph { color: var(--placeholder); }
     .cardcol { display: flex; flex-direction: column; align-items: flex-end; gap: 18px; padding-top: 40px; }
     .card { transform-style: preserve-3d; will-change: transform; width: 100%; max-width: 440px; }
     .cap { font-size: 11px; opacity: .55; width: 100%; max-width: 440px; text-align: center; }
