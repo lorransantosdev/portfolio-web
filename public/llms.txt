@@ -1,0 +1,33 @@
+# Lorran Sarmento (lorrandev)
+
+> Software Engineer Jr at Cielo (São Paulo, Brazil), on the sales cancellation team. Builds the payments backend that orchestrates the cancellation of almost every Cielo product. At night he builds MyCarsHub, a live SaaS for car rental businesses, in public. Also known as Lorran dos Santos and @lorrandev. Portfolio available in Portuguese and English.
+
+Lorran started far from code: selling cheese door to door, then running a silver jewelry store (WL Pratas). That is where he learned the skill he still uses most: listening to the customer. He joined Cielo as a technology intern in November 2024 and was hired as Software Engineer Jr in August 2025. He studies Software Engineering at FIAP, where he won the Global Solution twice and the Challenge at NEXT 2026 with Ford.
+
+## Pages
+
+- [Portfolio (Portuguese)](https://lorrandev.vercel.app/): full story, work at Cielo, MyCarsHub, content and contact
+- [Portfolio (English)](https://lorrandev.vercel.app/en): same content in English
+- [Résumé PT (PDF)](https://lorrandev.vercel.app/lorran-sarmento-cv-pt.pdf)
+- [Résumé EN (PDF)](https://lorrandev.vercel.app/lorran-sarmento-cv-en.pdf)
+
+## Work
+
+- Cielo, Software Engineer Jr, sales cancellation (Aug 2025 to now; intern from Nov 2024): Java, Spring Boot, Angular, Oracle, event-driven architecture, Docker, Kubernetes, AWS. Has shipped AI projects inside Cielo.
+- [MyCarsHub](https://mycarshub.app.br): SaaS for rental businesses that rent financed cars and live on spreadsheets. Fleet, contracts and billing in one place, with paying customers. The landlord uploads the contract they already use, an AI API marks what changes per rental and turns it into a Mustache template. Stack: Java on Render, Angular on Vercel, Postgres on Supabase, Resend for email, AbacatePay for payments.
+
+## Skills
+
+Java, Spring Boot, Angular, React, TypeScript, PostgreSQL, Oracle, AWS, Docker, Kubernetes, event-driven architecture, System Design, Design Patterns, idempotency, observability, AI integrations.
+
+How he thinks about code, four questions before shipping: is it safe? is it fast? if it runs twice, is the result the same? how much does it cost?
+
+## Contact
+
+- Email: lorransantossarmento@gmail.com
+- [LinkedIn](https://www.linkedin.com/in/lorran-sarmento)
+- [GitHub](https://github.com/lorransantosdev)
+- [YouTube @lorranndev](https://youtube.com/@lorranndev): building MyCarsHub live, events
+- [Instagram @lorrandev](https://instagram.com/lorrandev)
+- [TikTok @lorrandev](https://tiktok.com/@lorrandev)
+- [X @lorrandev](https://x.com/lorrandev)

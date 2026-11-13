@@ -7,9 +7,9 @@ export const EN: Content = {
   locale: 'en-US',
   path: '/en',
   meta: {
-    title: 'Lorran dos Santos — portfolio',
+    title: 'Lorran Sarmento — Software Engineer (lorrandev)',
     description:
-      'Software Engineer Jr at Cielo, building MyCarsHub at night. Payments backend, a live SaaS and a story that started selling cheese door to door.',
+      'Software Engineer Jr at Cielo and creator of MyCarsHub. Payments backend with Java, Spring Boot and Angular, and a story that started selling cheese door to door.',
     ogLocale: 'en_US',
     ogImageAlt: 'Lorran, in red, and Scott, the dog mascot of this portfolio',
   },

@@ -1,7 +1,7 @@
 import { Injectable, inject, DOCUMENT } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { Content } from '../content/types';
-import { SITE_URL } from '../content/shared';
+import { LINKS, SITE_URL } from '../content/shared';
 
 @Injectable({ providedIn: 'root' })
 export class SeoService {
@@ -39,10 +39,79 @@ export class SeoService {
       this.meta.updateTag(t, sel);
     }
 
+    this.meta.updateTag({ name: 'robots', content: 'index, follow, max-image-preview:large, max-snippet:-1' }, 'name="robots"');
+    this.meta.updateTag({ name: 'author', content: 'Lorran Sarmento' }, 'name="author"');
+
     this.link('canonical', url);
     this.link('alternate', SITE_URL + '/', 'pt-BR');
     this.link('alternate', SITE_URL + '/en', 'en');
     this.link('alternate', SITE_URL + '/', 'x-default');
+    this.jsonLd(c, url, image);
+  }
+
+  // dados estruturados pro Google e pros assistentes de IA entenderem quem é quem
+  private jsonLd(c: Content, url: string, image: string): void {
+    const pt = c.lang === 'pt';
+    const person = {
+      '@type': 'Person',
+      '@id': SITE_URL + '/#lorran',
+      name: 'Lorran Sarmento',
+      alternateName: ['Lorran dos Santos', 'lorrandev'],
+      url: SITE_URL + '/',
+      image: SITE_URL + '/assets/avatar.webp',
+      email: 'mailto:' + LINKS.email,
+      jobTitle: pt ? 'Engenheiro de Software Jr' : 'Software Engineer Jr',
+      worksFor: { '@type': 'Organization', name: 'Cielo', url: 'https://www.cielo.com.br' },
+      alumniOf: { '@type': 'CollegeOrUniversity', name: 'FIAP', url: 'https://www.fiap.com.br' },
+      address: { '@type': 'PostalAddress', addressLocality: 'São Paulo', addressRegion: 'SP', addressCountry: 'BR' },
+      knowsAbout: [
+        'Java', 'Spring Boot', 'Angular', 'React', 'TypeScript', 'PostgreSQL', 'AWS', 'Kubernetes', 'Docker',
+        'Event-driven architecture', 'System Design', 'Design Patterns', 'Payments', 'SaaS',
+      ],
+      knowsLanguage: ['pt-BR', 'en'],
+      sameAs: [LINKS.linkedin, LINKS.github, LINKS.youtube, LINKS.instagram, LINKS.tiktok, LINKS.x],
+    };
+    const data = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        person,
+        {
+          '@type': 'WebSite',
+          '@id': SITE_URL + '/#site',
+          url: SITE_URL + '/',
+          name: 'lorran',
+          inLanguage: ['pt-BR', 'en'],
+          author: { '@id': SITE_URL + '/#lorran' },
+        },
+        {
+          '@type': 'ProfilePage',
+          '@id': url + '#page',
+          url,
+          name: c.meta.title,
+          description: c.meta.description,
+          inLanguage: c.htmlLang,
+          primaryImageOfPage: image,
+          isPartOf: { '@id': SITE_URL + '/#site' },
+          mainEntity: { '@id': SITE_URL + '/#lorran' },
+        },
+        {
+          '@type': 'SoftwareApplication',
+          name: 'MyCarsHub',
+          url: LINKS.mycarshub,
+          applicationCategory: 'BusinessApplication',
+          operatingSystem: 'Web',
+          creator: { '@id': SITE_URL + '/#lorran' },
+        },
+      ],
+    };
+    let el = this.doc.head.querySelector<HTMLScriptElement>('script#ld');
+    if (!el) {
+      el = this.doc.createElement('script');
+      el.id = 'ld';
+      el.type = 'application/ld+json';
+      this.doc.head.appendChild(el);
+    }
+    el.textContent = JSON.stringify(data);
   }
 
   private link(rel: string, href: string, hreflang?: string): void {
