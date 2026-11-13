@@ -16,7 +16,7 @@ import { ArrowLabelComponent } from '../core/arrow-label.component';
       <div class="navin">
         <a #logo class="logo" [href]="base() + '#topo'" [attr.aria-label]="t().nav.homeAria">
           <img class="mark" src="logo.svg" width="28" height="28" alt="" />
-          <span class="word">lorran<span class="deg" aria-hidden="true">°</span></span>
+          <span class="word">lorran</span>
           <span class="ch" aria-live="off" [swap]="chapter() ? '/ ' + chapter() : ''"></span>
         </a>
         <div class="navl">
@@ -57,7 +57,6 @@ import { ArrowLabelComponent } from '../core/arrow-label.component';
     @media (prefers-reduced-motion: reduce) {
       @keyframes mark-in { from { opacity: 0; scale: .9; } }
     }
-    .deg { color: var(--red); }
     .ch { font-weight: 400; font-size: 14px; color: var(--muted); }
     .navl { display: flex; gap: 22px; font-size: 14px; flex-wrap: wrap; }
     .navl a { text-decoration: none; }

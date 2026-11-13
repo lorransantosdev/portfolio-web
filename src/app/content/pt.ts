@@ -27,7 +27,7 @@ export const PT: Content = {
     switchHref: '/en',
     resume: 'Currículo ↗',
     resumeHref: LINKS.resumePt,
-    homeAria: 'lorran°, voltar ao topo',
+    homeAria: 'lorran, voltar ao topo',
     progressAria: 'Progresso da leitura',
   },
   hero: {
@@ -272,7 +272,7 @@ export const PT: Content = {
       { k: 'youtube', v: '@lorranndev', href: LINKS.youtube },
       { k: 'x', v: '@lorrandev', href: LINKS.x },
     ],
-    footerL: 'lorran° · São Paulo',
+    footerL: 'lorran · São Paulo',
     footerR: 'feito com café, 0 e 1 · 2026',
   },
   mini: { aria: 'Ir para o chat com o Scott' },

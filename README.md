@@ -1,4 +1,4 @@
-# lorran°
+# lorran
 
 Meu portfólio: [lorrandev](https://github.com/lorransantosdev). Backend na Cielo de dia, MyCarsHub de noite.
 

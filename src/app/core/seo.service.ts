@@ -18,7 +18,7 @@ export class SeoService {
     const tags: Record<string, string>[] = [
       { name: 'description', content: c.meta.description },
       { property: 'og:type', content: 'website' },
-      { property: 'og:site_name', content: 'lorran°' },
+      { property: 'og:site_name', content: 'lorran' },
       { property: 'og:title', content: c.meta.title },
       { property: 'og:description', content: c.meta.description },
       { property: 'og:url', content: url },
