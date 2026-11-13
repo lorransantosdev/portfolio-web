@@ -69,6 +69,29 @@ export interface Content {
     resumeHref: string;
     homeAria: string;
     progressAria: string;
+    share: string;
+  };
+  share: {
+    kicker: string;
+    titlePre: string;
+    titleEm: string;
+    copy: string;
+    copied: string;
+    via: string;
+    native: string;
+    story: string;
+    storyBusy: string;
+    close: string;
+    qrAria: string;
+    qrHint: string;
+    message: string;
+    subject: string;
+    storyKicker: string;
+    storyLine1: string;
+    storyLine2: string;
+    storyEm: string;
+    storyCta: string;
+    storyTag: string;
   };
   hero: {
     kicker: string;

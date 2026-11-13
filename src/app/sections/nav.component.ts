@@ -6,6 +6,7 @@ import { ChapterService } from '../core/chapter';
 import { MotionService } from '../core/motion.service';
 import { SwapComponent } from '../core/swap.component';
 import { ArrowLabelComponent } from '../core/arrow-label.component';
+import { ShareService } from '../share/share.service';
 
 @Component({
   selector: 'app-nav',
@@ -25,6 +26,11 @@ import { ArrowLabelComponent } from '../core/arrow-label.component';
           }
         </div>
         <div class="actions">
+          <button type="button" class="share tap" (click)="openShare()" [attr.aria-label]="t().nav.share" aria-haspopup="dialog">
+            <span class="dot" aria-hidden="true"></span>
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M1 1h5v5H1zM10 1h5v5h-5zM1 10h5v5H1zM10 10h2v2h-2zM13 13h2v2h-2zM10 13h2v2h-2zM13 10h2v2h-2z" /></svg>
+            <span class="lbl">{{ t().nav.share }}</span>
+          </button>
           <a class="lang tap" [href]="t().nav.switchHref" [attr.title]="t().nav.switchTitle"
              [attr.hreflang]="t().lang === 'pt' ? 'en' : 'pt-BR'" [attr.lang]="t().lang === 'pt' ? 'en' : 'pt-BR'">{{ t().nav.switchLabel }}</a>
           <a class="cv tap" [href]="t().nav.resumeHref" target="_blank" rel="noopener" [arrowLabel]="t().nav.resume"></a>
@@ -61,6 +67,20 @@ import { ArrowLabelComponent } from '../core/arrow-label.component';
     .navl { display: flex; gap: 22px; font-size: 14px; flex-wrap: wrap; }
     .navl a { text-decoration: none; }
     .actions { display: flex; align-items: center; gap: 8px; }
+    .share {
+      position: relative; display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px;
+      border-radius: var(--radius-pill); border: 1px solid rgba(0, 0, 0, .2); background: transparent; cursor: pointer;
+      font: 500 14px var(--font-body); color: inherit;
+    }
+    .share .ico { width: 14px; height: 14px; fill: currentColor; display: none; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); position: relative; }
+    .dot::after {
+      content: ''; position: absolute; inset: 0; border-radius: 50%; background: var(--red);
+      animation: ping 2.4s var(--ease-out) infinite;
+    }
+    @keyframes ping { 0% { transform: scale(1); opacity: .6; } 70%, 100% { transform: scale(3); opacity: 0; } }
+    @media (prefers-reduced-motion: reduce) { .dot::after { animation: none; } }
+    @media (hover: hover) and (pointer: fine) { .share:hover { border-color: var(--black); } }
     .lang {
       text-decoration: none; font-family: var(--font-mono); font-size: 12px; font-weight: 500;
       padding: 10px 12px; border-radius: var(--radius-pill); border: 1px solid rgba(0, 0, 0, .2);
@@ -80,6 +100,10 @@ import { ArrowLabelComponent } from '../core/arrow-label.component';
     }
     @media (max-width: 760px) {
       .navl { display: none; }
+      .share { width: 40px; padding: 0; justify-content: center; }
+      .share .lbl { display: none; }
+      .share .ico { display: block; }
+      .share .dot { position: absolute; top: 6px; right: 6px; width: 6px; height: 6px; }
       .ch { display: none; }
     }
     @media (min-width: 761px) and (max-width: 1024px) {
@@ -92,8 +116,13 @@ export class NavComponent {
   readonly t = inject(I18n).t;
   readonly chapter = inject(ChapterService).chapter;
   readonly base = computed(() => (this.t().path === '/' ? '/' : this.t().path));
+  private share = inject(ShareService);
   private prog = viewChild.required<ElementRef<HTMLElement>>('prog');
   private logo = viewChild.required<ElementRef<HTMLElement>>('logo');
+
+  openShare(): void {
+    this.share.open.set(true);
+  }
 
   constructor() {
     const motion = inject(MotionService);

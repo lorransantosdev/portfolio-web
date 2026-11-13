@@ -15,6 +15,7 @@ import { PublicoComponent } from '../sections/publico.component';
 import { ScottComponent } from '../sections/scott.component';
 import { ContatoComponent } from '../sections/contato.component';
 import { MiniScottComponent } from '../sections/mini-scott.component';
+import { ShareSheetComponent } from '../share/share-sheet.component';
 
 @Component({
   selector: 'app-home',
@@ -22,6 +23,7 @@ import { MiniScottComponent } from '../sections/mini-scott.component';
   imports: [
     NavComponent, HeroComponent, IntroComponent, OrigemComponent, FiapComponent, CieloComponent,
     MycarshubComponent, PublicoComponent, ScottComponent, ContatoComponent, MiniScottComponent,
+    ShareSheetComponent,
   ],
   template: `
     <a class="skip-link" [href]="(t().path === '/' ? '/' : t().path) + '#historia'">{{ t().lang === 'pt' ? 'Pular para o conteúdo' : 'Skip to content' }}</a>
@@ -39,6 +41,7 @@ import { MiniScottComponent } from '../sections/mini-scott.component';
       </main>
       <app-contato />
       <app-mini-scott />
+      @defer (on idle) { <app-share-sheet /> }
     </div>
   `,
   styles: `
