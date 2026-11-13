@@ -158,7 +158,6 @@ export const PT: Content = {
       { label: 'Vencimento: toda', v: 'segunda-feira', ph: '{{contrato.dia}}' },
     ],
     sample: 'dados fictícios',
-    dashLabel: 'mycarshub · dashboard',
     dashAlt:
       'Dashboard do MyCarsHub: faturado, recebido, despesas, lucro, ocupação, atrasos e calendário financeiro',
     phoneAlt: 'MyCarsHub no celular',
@@ -180,11 +179,11 @@ export const PT: Content = {
     stackTop: '↓ push · topo da pilha',
     stackBottom: 'base',
     layers: [
-      { idx: '101', label: 'práticas', items: ['System Design', 'Idempotência', 'Observabilidade'] },
+      { idx: '101', label: 'práticas', items: ['System Design', 'Design Patterns', 'Idempotência', 'Observabilidade'] },
       { idx: '100', label: 'infra', items: ['AWS', 'Docker', 'Kubernetes', 'Render', 'Vercel'] },
       { idx: '011', label: 'dados · eventos', items: ['Oracle', 'PostgreSQL', 'Supabase', 'Arquitetura orientada a eventos'] },
       { idx: '010', label: 'backend', items: ['Java', 'Spring Boot', 'APIs REST', 'Resend'] },
-      { idx: '001', label: 'frontend', items: ['Angular'] },
+      { idx: '001', label: 'frontend', items: ['Angular', 'React', 'TypeScript'] },
       { idx: '000', label: 'IA', items: ['LLMs', 'API de IA', 'Mustache'] },
     ],
     ghTitle: 'E no GitHub.',

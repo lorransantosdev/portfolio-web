@@ -23,7 +23,10 @@ import { ArrowLabelComponent } from '../core/arrow-label.component';
     <section id="mycarshub" [chapter]="t().mycarshub.chapter" [say]="t().mycarshub.say" class="sec" aria-labelledby="mch-t">
       <div class="head">
         <h2 id="mch-t" class="title" rise="MyCarsHub"></h2>
-        <p class="lead">{{ t().mycarshub.lead }}</p>
+        <div class="lead">
+          <p>{{ t().mycarshub.lead }}</p>
+          <a class="site mono" [href]="t().mycarshub.ctaProduct.href" target="_blank" rel="noopener" [arrowLabel]="'mycarshub.app.br ↗'"></a>
+        </div>
       </div>
 
       <p reveal class="story">{{ t().mycarshub.story.a }}<span class="muted">{{ t().mycarshub.story.b }}</span>{{ t().mycarshub.story.c }}<span class="red shine">{{ t().mycarshub.story.d }}</span></p>
@@ -36,7 +39,7 @@ import { ArrowLabelComponent } from '../core/arrow-label.component';
         <div reveal="clip" class="win tilt-card">
           <div class="bar">
             <span class="d" style="background: #ff5f57"></span><span class="d" style="background: #febc2e"></span><span class="d" style="background: #28c840"></span>
-            <span class="url mono">{{ t().mycarshub.dashLabel }}</span>
+            <a class="url mono" [href]="t().mycarshub.ctaProduct.href" target="_blank" rel="noopener">mycarshub.app.br</a>
           </div>
           <img src="assets/mycarshub-dashboard.webp" width="1192" height="677" [alt]="t().mycarshub.dashAlt" loading="lazy" decoding="async" />
         </div>
@@ -82,6 +85,8 @@ import { ArrowLabelComponent } from '../core/arrow-label.component';
     }
     .head .title { grid-column: 1 / span 8; }
     .head .lead { grid-column: 9 / -1; }
+    .head .lead p { margin: 0; }
+    .site { display: inline-flex; margin-top: 14px; font-size: 13px; color: var(--red); text-decoration: none; }
     @media (max-width: 1024px) {
       .head { grid-template-columns: minmax(0, 1fr); }
       .head .title, .head .lead { grid-column: 1; }
@@ -107,7 +112,7 @@ import { ArrowLabelComponent } from '../core/arrow-label.component';
     }
     .bar { height: 34px; display: flex; align-items: center; gap: 7px; padding: 0 14px; background: #1f1f1f; }
     .d { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .url { margin-left: 14px; font-size: 11px; color: #8a8a8a; }
+    .url { margin-left: 14px; font-size: 11px; color: #8a8a8a; text-decoration: none; }
     .win img { width: 100%; height: auto; display: block; }
     .phone {
       position: absolute; right: 4%; bottom: -30px; width: 21%; max-width: 230px; height: auto;

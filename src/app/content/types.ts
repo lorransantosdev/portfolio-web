@@ -132,7 +132,6 @@ export interface Content {
     badges: [string, string, string];
     lines: ContractLine[];
     sample: string;
-    dashLabel: string;
     dashAlt: string;
     phoneAlt: string;
     badgeTitle: string;
